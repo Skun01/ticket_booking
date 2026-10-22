@@ -48,9 +48,6 @@ import { MoneyPipe } from '../../shared/money.pipe';
 
         <aside class="detail-tickets">
           <h2>Hạng vé</h2>
-          @if (bookingNotice()) {
-            <p class="form-notice" role="status">{{ bookingNotice() }}</p>
-          }
           <p class="muted">Thời gian hiển thị theo giờ Việt Nam (UTC+7).</p>
           @if (ev.ticketTypes.length === 0) {
             <p class="muted">Chưa có hạng vé nào được mở bán.</p>
@@ -195,7 +192,6 @@ export class EventDetailPage {
   private readonly route = inject(ActivatedRoute);
   protected readonly session = inject(SessionService);
   private readonly now = signal(Date.now());
-  protected readonly bookingNotice = signal('');
   private readonly router = inject(Router);
 
   protected readonly event = signal<EventDetail | null>(null);
@@ -214,7 +210,6 @@ export class EventDetailPage {
           this.loading.set(true);
           this.error.set('');
           this.event.set(null);
-          this.bookingNotice.set('');
           const eventId = Number(id);
           if (!id || !/^[1-9]\d*$/.test(id) || !Number.isSafeInteger(eventId)) {
             this.error.set('Đường dẫn sự kiện không hợp lệ.');
@@ -257,14 +252,7 @@ export class EventDetailPage {
   protected book(tt: TicketType): void {
     const ev = this.event();
     if (!ev || this.session.loading() || this.unavailableReason(tt)) return;
-    if (!this.session.isAuthenticated()) {
-      void this.router.navigate(['/login'], { queryParams: { returnUrl: `/events/${ev.id}` } });
-      return;
-    }
-    if (!this.session.isCustomer()) return;
-    // Phase 3 sẽ thay thông báo này bằng bước chọn số lượng và tạo đơn.
-    this.bookingNotice.set(
-      `Bạn đã chọn hạng vé ${tt.name}. Chức năng đặt vé chưa được mở, vui lòng quay lại sau.`,
-    );
+    // customerGuard giữ cả sự kiện và hạng vé đã chọn qua bước đăng nhập.
+    void this.router.navigate(['/events', ev.id, 'book'], { queryParams: { ticketTypeId: tt.id } });
   }
 }

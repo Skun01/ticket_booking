@@ -6,7 +6,7 @@ import { ErrorStateMatcher } from '@angular/material/core';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { apiError } from '../../core/api/api-error';
-import { homeRouteFor } from '../../core/auth/home-route';
+import { postLoginRoute } from '../../core/auth/home-route';
 import { SessionService } from '../../core/auth/session.service';
 import { Icon } from '../../shared/icon';
 
@@ -95,7 +95,10 @@ import { Icon } from '../../shared/icon';
           </button>
         </form>
         <p class="login-footnote">
-          Chưa có tài khoản? <a routerLink="/register">Đăng ký tài khoản mới</a>
+          Chưa có tài khoản?
+          <a routerLink="/register" [queryParams]="{ returnUrl: returnUrl }"
+            >Đăng ký tài khoản mới</a
+          >
         </p>
       }
     </section>
@@ -104,7 +107,7 @@ import { Icon } from '../../shared/icon';
 export class LoginPage {
   protected readonly session = inject(SessionService);
   private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
+  protected readonly returnUrl = inject(ActivatedRoute).snapshot.queryParamMap.get('returnUrl');
   protected readonly busy = signal(false);
   protected readonly error = signal('');
   protected readonly fieldErrors = signal<Record<string, string>>({});
@@ -148,11 +151,7 @@ export class LoginPage {
       const { email, password } = this.form.getRawValue();
       const user = await this.session.login(email.trim(), password);
       this.form.controls.password.reset();
-      const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-      // Chỉ nhận route sự kiện nội bộ, không nhận URL bên ngoài hay route tùy ý.
-      const destination =
-        returnUrl && /^\/events(?:\/[1-9]\d*)?$/.test(returnUrl) ? returnUrl : homeRouteFor(user);
-      await this.router.navigateByUrl(destination);
+      await this.router.navigateByUrl(postLoginRoute(user, this.returnUrl));
     } catch (err) {
       const problem = apiError(err);
       this.error.set(problem.message);

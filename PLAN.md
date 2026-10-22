@@ -124,9 +124,8 @@ Phục vụ `/api/organizer/events/*` và `/api/ticket-types/{id}`. organizerGua
 2. **Tạo / sửa sự kiện** `/organizer/events/new`, `/organizer/events/:id/edit`:
    - Form theo `EventRequest`: danh mục, địa điểm, tiêu đề, mô tả, banner URL, thời gian bắt đầu
      (`@Future`) / kết thúc.
-   - Danh mục & địa điểm: cần dữ liệu để chọn. **Lưu ý scope:** backend chỉ expose categories/venues
-     qua API `/api/admin/*` (yêu cầu ADMIN). Cần quyết định nguồn dữ liệu cho organizer (xem mục
-     "Phụ thuộc & quyết định").
+   - Danh mục & địa điểm: dùng `GET /api/categories` và `GET /api/venues` công khai đã bổ sung ở
+     Phase 0; tải đầy đủ các trang cho dropdown, không gọi API quản trị.
 3. **Chi tiết sự kiện (quản lý)** `/organizer/events/:id`:
    - Thông tin sự kiện + đổi trạng thái (`PATCH /{id}/status`: DRAFT→PUBLISHED→ENDED/CANCELLED).
    - Quản lý hạng vé: `GET /{id}/ticket-types`, tạo (`POST /{id}/ticket-types`), sửa
@@ -187,8 +186,8 @@ Phục vụ `/api/admin/*`. adminGuard + `admin-layout` sẵn có.
    **Phase 0**.
 2. **Điều hướng mặc định sau đăng nhập.** ✅ **ĐÃ CHỐT — theo vai trò:** customer → `/events`,
    organizer → `/organizer`, admin → `/admin`.
-3. **Thư viện biểu đồ** cho báo cáo (Phase 4 & 6). ✅ **ĐÃ CHỐT — thêm thư viện** (chart.js hoặc
-   ngx-charts). Sẽ cài 1 package vào dự án; chốt thư viện cụ thể khi bắt đầu Phase 4.
+3. **Thư viện biểu đồ** cho báo cáo (Phase 4 & 6). ✅ **ĐÃ CHỐT — Chart.js 4**, dùng trực tiếp
+   không thêm wrapper Angular. Biểu đồ cột kèm bảng dữ liệu để đọc bằng bàn phím/screen reader.
 
 ---
 

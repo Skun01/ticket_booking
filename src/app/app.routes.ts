@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { adminGuard } from './core/auth/admin.guard';
+import { customerGuard } from './core/auth/customer.guard';
 import { organizerGuard } from './core/auth/organizer.guard';
 
 export const routes: Routes = [
@@ -27,6 +28,31 @@ export const routes: Routes = [
         path: 'events',
         title: 'Sự kiện · Fullstack Starter',
         loadComponent: () => import('./features/events/events-page').then((m) => m.EventsPage),
+      },
+      {
+        path: 'events/:id/book',
+        canActivate: [customerGuard],
+        title: 'Đặt vé · Fullstack Starter',
+        loadComponent: () => import('./features/events/booking-page').then((m) => m.BookingPage),
+      },
+      {
+        path: 'orders',
+        canActivate: [customerGuard],
+        title: 'Đơn của tôi · Fullstack Starter',
+        loadComponent: () => import('./features/orders/orders-page').then((m) => m.OrdersPage),
+      },
+      {
+        path: 'orders/:id',
+        canActivate: [customerGuard],
+        title: 'Chi tiết đơn vé · Fullstack Starter',
+        loadComponent: () =>
+          import('./features/orders/order-detail-page').then((m) => m.OrderDetailPage),
+      },
+      {
+        path: 'tickets',
+        canActivate: [customerGuard],
+        title: 'Vé của tôi · Fullstack Starter',
+        loadComponent: () => import('./features/tickets/tickets-page').then((m) => m.TicketsPage),
       },
       {
         path: 'events/:id',
@@ -66,7 +92,53 @@ export const routes: Routes = [
     canActivate: [organizerGuard],
     canActivateChild: [organizerGuard],
     loadComponent: () => import('./layout/organizer-layout').then((m) => m.OrganizerLayout),
-    children: [],
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        title: 'Sự kiện của tôi · Fullstack Starter',
+        loadComponent: () =>
+          import('./features/organizer/organizer-events-page').then((m) => m.OrganizerEventsPage),
+      },
+      {
+        path: 'checkin',
+        title: 'Check-in vé · Fullstack Starter',
+        loadComponent: () =>
+          import('./features/organizer/organizer-checkin-page').then((m) => m.OrganizerCheckInPage),
+      },
+      {
+        path: 'events/new',
+        title: 'Tạo sự kiện · Fullstack Starter',
+        loadComponent: () =>
+          import('./features/organizer/organizer-event-form-page').then(
+            (m) => m.OrganizerEventFormPage,
+          ),
+      },
+      {
+        path: 'events/:id/edit',
+        title: 'Sửa sự kiện · Fullstack Starter',
+        loadComponent: () =>
+          import('./features/organizer/organizer-event-form-page').then(
+            (m) => m.OrganizerEventFormPage,
+          ),
+      },
+      {
+        path: 'events/:id/report',
+        title: 'Báo cáo sự kiện · Fullstack Starter',
+        loadComponent: () =>
+          import('./features/organizer/organizer-event-report-page').then(
+            (m) => m.OrganizerEventReportPage,
+          ),
+      },
+      {
+        path: 'events/:id',
+        title: 'Quản lý sự kiện · Fullstack Starter',
+        loadComponent: () =>
+          import('./features/organizer/organizer-event-detail-page').then(
+            (m) => m.OrganizerEventDetailPage,
+          ),
+      },
+    ],
   },
   {
     path: '**',

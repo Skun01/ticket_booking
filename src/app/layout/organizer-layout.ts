@@ -11,14 +11,23 @@ import { Icon } from '../shared/icon';
     <a class="skip-link" href="#organizer-content">Đến nội dung tổ chức</a>
     <div class="admin-shell">
       <aside class="admin-sidebar">
-        <a class="brand" routerLink="/"><span class="brand-icon"><app-icon name="calendar" /></span> Kênh tổ chức</a>
+        <a class="brand" routerLink="/"
+          ><span class="brand-icon"><app-icon name="calendar" /></span> Kênh tổ chức</a
+        >
         <p class="eyebrow">QUẢN LÝ SỰ KIỆN</p>
         <nav aria-label="Điều hướng tổ chức">
-          <a routerLink="/organizer" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+          <a
+            routerLink="/organizer"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
             <app-icon name="list" /> Sự kiện của tôi
           </a>
           <a routerLink="/organizer/checkin" routerLinkActive="active">
             <app-icon name="check" /> Check-in vé
+          </a>
+          <a routerLink="/organizer/events/new" routerLinkActive="active">
+            <app-icon name="calendar" /> Tạo sự kiện
           </a>
           <a routerLink="/"><app-icon name="left" /> Về trang chủ</a>
         </nav>
@@ -26,16 +35,26 @@ import { Icon } from '../shared/icon';
       </aside>
       <div class="admin-main">
         <header class="admin-header">
-          <div><span class="eyebrow">TÀI KHOẢN TỔ CHỨC</span><strong>{{ session.user()?.fullName }}</strong></div>
+          <div>
+            <span class="eyebrow">TÀI KHOẢN TỔ CHỨC</span
+            ><strong>{{ session.user()?.fullName }}</strong>
+          </div>
           <button mat-stroked-button type="button" [disabled]="signingOut()" (click)="logout()">
             <app-icon name="logout" /> {{ signingOut() ? 'Đang đăng xuất…' : 'Đăng xuất' }}
           </button>
         </header>
         <main id="organizer-content" class="admin-content" tabindex="-1">
-          @if (session.isOrganizer()) { <router-outlet /> }
+          @if (session.isOrganizer()) {
+            <router-outlet />
+          }
         </main>
       </div>
     </div>
+  `,
+  styles: `
+    .admin-main {
+      min-width: 0;
+    }
   `,
 })
 export class OrganizerLayout {
@@ -46,7 +65,7 @@ export class OrganizerLayout {
   constructor() {
     effect(() => {
       if (!this.session.loading() && !this.session.isOrganizer() && !this.signingOut()) {
-        void this.router.navigate(['/login']);
+        void this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
       }
     });
   }

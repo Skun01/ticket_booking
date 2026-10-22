@@ -19,33 +19,62 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const path = new URL(request.url, window.location.origin).pathname;
   const authPath = `${new URL(base, window.location.origin).pathname}/auth`;
   if (path === authPath || path.startsWith(`${authPath}/`)) {
-    return next(request.clone({ withCredentials: true, headers: request.headers.delete('Authorization') }));
+    return next(
+      request.clone({ withCredentials: true, headers: request.headers.delete('Authorization') }),
+    );
   }
 
   const session = inject(SessionService);
-  return from(session.initialize()).pipe(switchMap(() => {
-    const token = session.accessToken();
-    const revision = session.revision();
-    return next(withToken(request, token)).pipe(catchError((error: unknown) => {
-      if (!(error instanceof HttpErrorResponse) || error.status !== 401 || !token ||
-          !['GET', 'HEAD'].includes(request.method) || revision !== session.revision()) {
-        return throwError(() => error);
-      }
-
-      // Một phản hồi 401 đến muộn có thể vẫn dùng token cũ dù request khác đã refresh xong.
-      const current = session.accessToken();
-      if (!current) return throwError(() => error);
-      const renewal = current !== token ? Promise.resolve(current) : session.refreshAccessToken();
-      return from(renewal).pipe(switchMap((renewedToken) => {
-        if (revision !== session.revision()) return throwError(() => error);
-        return next(withToken(request, renewedToken)).pipe(catchError((retryError: unknown) => {
-          if (retryError instanceof HttpErrorResponse && retryError.status === 401 &&
-              revision === session.revision()) {
-            session.invalidate(renewedToken);
+  return from(session.initialize()).pipe(
+    switchMap(() => {
+      const token = session.accessToken();
+      const revision = session.revision();
+      return next(withToken(request, token)).pipe(
+        catchError((error: unknown) => {
+          if (
+            !(error instanceof HttpErrorResponse) ||
+            error.status !== 401 ||
+            !token ||
+            !['GET', 'HEAD'].includes(request.method) ||
+            revision !== session.revision()
+          ) {
+            // Không replay POST tạo đơn/thanh toán khi 401; cho phép đăng nhập lại ở UI.
+            if (
+              error instanceof HttpErrorResponse &&
+              error.status === 401 &&
+              token &&
+              revision === session.revision() &&
+              !['GET', 'HEAD'].includes(request.method)
+            ) {
+              session.invalidate(token);
+            }
+            return throwError(() => error);
           }
-          return throwError(() => retryError);
-        }));
-      }));
-    }));
-  }));
+
+          // Một phản hồi 401 đến muộn có thể vẫn dùng token cũ dù request khác đã refresh xong.
+          const current = session.accessToken();
+          if (!current) return throwError(() => error);
+          const renewal =
+            current !== token ? Promise.resolve(current) : session.refreshAccessToken();
+          return from(renewal).pipe(
+            switchMap((renewedToken) => {
+              if (revision !== session.revision()) return throwError(() => error);
+              return next(withToken(request, renewedToken)).pipe(
+                catchError((retryError: unknown) => {
+                  if (
+                    retryError instanceof HttpErrorResponse &&
+                    retryError.status === 401 &&
+                    revision === session.revision()
+                  ) {
+                    session.invalidate(renewedToken);
+                  }
+                  return throwError(() => retryError);
+                }),
+              );
+            }),
+          );
+        }),
+      );
+    }),
+  );
 };
