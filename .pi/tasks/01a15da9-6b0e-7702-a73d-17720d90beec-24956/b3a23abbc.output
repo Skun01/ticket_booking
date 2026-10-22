@@ -1,0 +1,17 @@
+
+> frontend@0.0.0 test
+> ng test --watch=false
+
+❯ Building...
+✔ Building...
+Application bundle generation complete. [3.060 seconds] - 2026-10-21T08:58:16.973Z
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.5 [39m[90mD:/Dev/sport_slot/frontend[39m
+
+
+[2m Test Files [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[32m20 passed[39m[22m[90m (20)[39m
+[2m   Start at [22m 15:58:17
+[2m   Duration [22m 5.64s[2m (environment 70%, setup 19%, tests 5%, transform 3%, import 2%)[22m
+

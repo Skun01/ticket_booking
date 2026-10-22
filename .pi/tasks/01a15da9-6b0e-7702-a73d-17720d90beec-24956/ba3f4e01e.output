@@ -1,0 +1,28 @@
+
+> frontend@0.0.0 build
+> ng build
+
+❯ Building...
+✔ Building...
+Initial chunk files | Names         |  Raw size | Estimated transfer size
+main-JB3VILAH.js    | main          | 281.22 kB |                76.26 kB
+styles-KM4MG3UZ.css | styles        |  16.32 kB |                 3.15 kB
+
+                    | Initial total | 297.55 kB |                79.41 kB
+
+Lazy chunk files    | Names         |  Raw size | Estimated transfer size
+chunk-K6-VK_GP.js   | -             | 110.73 kB |                20.78 kB
+chunk-2jhi0h4g.js   | -             |  54.40 kB |                10.17 kB
+chunk-UAg9G5Yz.js   | login-page    |   5.02 kB |                 1.93 kB
+chunk-DOrygR45.js   | register-page |   4.48 kB |                 1.67 kB
+chunk-Da4cENS4.js   | home-page     |   2.77 kB |                 1.32 kB
+chunk-Bjqnij36.js   | public-layout |   2.73 kB |                 1.23 kB
+chunk-CXozjyq1.js   | admin-layout  |   2.42 kB |                 1.17 kB
+chunk-CyL4yvID.js   | -             |   1.52 kB |               828 bytes
+chunk-CGZbuGgD.js   | admin-home    |   1.43 kB |               762 bytes
+chunk-GE0v9fbr.js   | status-page   |   1.01 kB |                 1.01 kB
+
+Application bundle generation complete. [10.406 seconds] - 2026-10-21T08:57:39.392Z
+
+Output location: D:\Dev\sport_slot\frontend\dist\frontend
+

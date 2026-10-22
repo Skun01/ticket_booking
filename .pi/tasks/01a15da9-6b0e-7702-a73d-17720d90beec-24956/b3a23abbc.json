@@ -1,0 +1,30 @@
+{
+  "id": "b3a23abbc",
+  "name": "Kiểm tra unit tests",
+  "command": "npm test -- --watch=false",
+  "status": "completed",
+  "outputPath": ".pi\\tasks\\01a15da9-6b0e-7702-a73d-17720d90beec-24956\\b3a23abbc.output",
+  "cwd": "D:\\Dev\\sport_slot\\frontend",
+  "startTime": 1792573091694,
+  "endTime": 1792573103730,
+  "exitCode": 0,
+  "signal": null,
+  "pid": 6616,
+  "bytesWritten": 521,
+  "isAgent": false,
+  "surviveReload": false,
+  "notified": true,
+  "notifyOnCompletion": true,
+  "triggerOnCompletion": true,
+  "timeoutSeconds": 180,
+  "shellPolicy": {
+    "policy": "cmd",
+    "executable": "C:\\Windows\\system32\\cmd.exe",
+    "argvPrefix": [
+      "/d",
+      "/s",
+      "/c"
+    ],
+    "dialect": "cmd"
+  }
+}

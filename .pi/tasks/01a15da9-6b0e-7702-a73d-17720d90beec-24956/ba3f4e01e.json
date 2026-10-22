@@ -1,0 +1,30 @@
+{
+  "id": "ba3f4e01e",
+  "name": "Kiểm tra build theme",
+  "command": "npm run build",
+  "status": "completed",
+  "outputPath": ".pi\\tasks\\01a15da9-6b0e-7702-a73d-17720d90beec-24956\\ba3f4e01e.output",
+  "cwd": "D:\\Dev\\sport_slot\\frontend",
+  "startTime": 1792573040938,
+  "endTime": 1792573062155,
+  "exitCode": 0,
+  "signal": null,
+  "pid": 16992,
+  "bytesWritten": 1327,
+  "isAgent": false,
+  "surviveReload": false,
+  "notified": true,
+  "notifyOnCompletion": true,
+  "triggerOnCompletion": true,
+  "timeoutSeconds": 180,
+  "shellPolicy": {
+    "policy": "cmd",
+    "executable": "C:\\Windows\\system32\\cmd.exe",
+    "argvPrefix": [
+      "/d",
+      "/s",
+      "/c"
+    ],
+    "dialect": "cmd"
+  }
+}
