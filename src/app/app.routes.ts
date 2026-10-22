@@ -24,6 +24,17 @@ export const routes: Routes = [
         loadComponent: () => import('./features/auth/register-page').then((m) => m.RegisterPage),
       },
       {
+        path: 'events',
+        title: 'Sự kiện · Fullstack Starter',
+        loadComponent: () => import('./features/events/events-page').then((m) => m.EventsPage),
+      },
+      {
+        path: 'events/:id',
+        title: 'Chi tiết sự kiện · Fullstack Starter',
+        loadComponent: () =>
+          import('./features/events/event-detail-page').then((m) => m.EventDetailPage),
+      },
+      {
         path: 'forbidden',
         title: 'Không đủ quyền · Fullstack Starter',
         loadComponent: () => import('./features/status/status-page').then((m) => m.StatusPage),
