@@ -157,6 +157,7 @@ export interface RevenueReport {
 export interface EventFilter {
   categoryId?: number | null;
   city?: string | null;
+  keyword?: string | null;
   from?: string | null;
   to?: string | null;
 }
