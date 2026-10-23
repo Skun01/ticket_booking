@@ -1,3 +1,4 @@
+import { LoadingState } from '../../shared/loading-state';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -10,7 +11,7 @@ import { MatSelect } from '@angular/material/select';
 import { MatOption } from '@angular/material/core';
 import { EMPTY, catchError, combineLatest, finalize, interval, switchMap } from 'rxjs';
 import { CatalogApi, OrderApi } from '../../core/api/catalog.api';
-import { apiError } from '../../core/api/api-error';
+import { FeedbackService } from '../../shared/feedback.service';
 import { EventDetail, TicketType } from '../../core/api/models';
 import { SessionService } from '../../core/auth/session.service';
 import { DateTimePipe } from '../../shared/date-time.pipe';
@@ -20,6 +21,7 @@ import { PageHeader } from '../../shared/page-header';
 @Component({
   selector: 'app-booking-page',
   imports: [
+    LoadingState,
     RouterLink,
     ReactiveFormsModule,
     MatButton,
@@ -35,7 +37,7 @@ import { PageHeader } from '../../shared/page-header';
   template: `
     <app-page-header title="Đặt vé" subtitle="Chọn một hạng vé và số lượng cho đơn của bạn." />
     @if (loading()) {
-      <p role="status">Đang tải thông tin đặt vé…</p>
+      <app-loading-state label="Đang tải thông tin đặt vé…" />
     } @else if (loadError()) {
       <p class="form-notice error" role="alert">{{ loadError() }}</p>
       <a mat-stroked-button routerLink="/events">Khám phá sự kiện</a>
@@ -145,6 +147,7 @@ import { PageHeader } from '../../shared/page-header';
   `,
 })
 export class BookingPage {
+  private readonly feedback = inject(FeedbackService);
   private readonly catalog = inject(CatalogApi);
   private readonly orders = inject(OrderApi);
   private readonly route = inject(ActivatedRoute);
@@ -223,8 +226,10 @@ export class BookingPage {
             }),
             catchError((error) => {
               this.loadError.set(
-                apiError(error, 'Không thể tải sự kiện để đặt vé. Vui lòng quay lại danh sách.')
-                  .message,
+                this.feedback.problem(
+                  error,
+                  'Không thể tải sự kiện để đặt vé. Vui lòng quay lại danh sách.',
+                ).message,
               );
               this.loading.set(false);
               return EMPTY;
@@ -261,12 +266,14 @@ export class BookingPage {
       )
       .subscribe({
         next: (order) => {
+          this.feedback.success('Đã tạo đơn và giữ chỗ. Vui lòng thanh toán trước thời hạn.');
           this.uncertain.set(true); // Không tạo lại đơn kể cả khi điều hướng chưa kết thúc.
           void this.router.navigate(['/orders', order.id]);
         },
         error: (error: unknown) => {
           this.error.set(
-            apiError(error, 'Không thể tạo đơn. Vui lòng kiểm tra lại thông tin.').message,
+            this.feedback.problem(error, 'Không thể tạo đơn. Vui lòng kiểm tra lại thông tin.')
+              .message,
           );
           if (!(error instanceof HttpErrorResponse) || error.status === 0 || error.status >= 500)
             this.uncertain.set(true);

@@ -1,3 +1,4 @@
+import { LoadingState } from '../../shared/loading-state';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -5,7 +6,7 @@ import { RouterLink } from '@angular/router';
 import { MatButton } from '@angular/material/button';
 import { Subscription, finalize } from 'rxjs';
 import { TicketApi } from '../../core/api/catalog.api';
-import { apiError } from '../../core/api/api-error';
+import { FeedbackService } from '../../shared/feedback.service';
 import { Ticket } from '../../core/api/models';
 import { DateTimePipe } from '../../shared/date-time.pipe';
 import { EmptyState } from '../../shared/empty-state';
@@ -16,7 +17,16 @@ import { saveBlob } from '../../shared/download-file';
 
 @Component({
   selector: 'app-tickets-page',
-  imports: [RouterLink, MatButton, DateTimePipe, EmptyState, PageHeader, Paginator, StatusBadge],
+  imports: [
+    LoadingState,
+    RouterLink,
+    MatButton,
+    DateTimePipe,
+    EmptyState,
+    PageHeader,
+    Paginator,
+    StatusBadge,
+  ],
   template: `
     <app-page-header
       title="Vé của tôi"
@@ -31,7 +41,7 @@ import { saveBlob } from '../../shared/download-file';
       <p class="form-notice" role="status">{{ downloadNotice() }}</p>
     }
     @if (loading()) {
-      <p role="status">Đang tải vé của bạn…</p>
+      <app-loading-state label="Đang tải vé của bạn…" />
     } @else if (error()) {
       <p class="form-notice error" role="alert">{{ error() }}</p>
       <button mat-stroked-button type="button" (click)="load(page())">Thử lại</button>
@@ -136,6 +146,7 @@ import { saveBlob } from '../../shared/download-file';
   `,
 })
 export class TicketsPage {
+  private readonly feedback = inject(FeedbackService);
   private readonly api = inject(TicketApi);
   private readonly destroyRef = inject(DestroyRef);
   private request?: Subscription;
@@ -170,7 +181,7 @@ export class TicketsPage {
           this.loading.set(false);
         },
         error: (error) => {
-          this.error.set(apiError(error, 'Không thể tải vé của bạn.').message);
+          this.error.set(this.feedback.problem(error, 'Không thể tải vé của bạn.').message);
           this.loading.set(false);
         },
       });
@@ -191,12 +202,14 @@ export class TicketsPage {
         next: (blob) => {
           if (!blob.size || !blob.type.includes('application/pdf')) {
             this.downloadError.set('Máy chủ không trả về file PDF hợp lệ. Vui lòng thử lại.');
+            this.feedback.error(this.downloadError());
             return;
           }
           saveBlob(blob, `ticket-${ticket.id}.pdf`);
           this.downloadNotice.set(
             `Đã gửi yêu cầu tải vé ${ticket.ticketCode}. Kiểm tra mục tải xuống của trình duyệt.`,
           );
+          this.feedback.info('Đã gửi yêu cầu tải PDF vé. Kiểm tra mục tải xuống của trình duyệt.');
         },
         error: (error: unknown) => {
           void this.showDownloadError(error);
@@ -219,7 +232,7 @@ export class TicketsPage {
     }
     if (!this.destroyRef.destroyed)
       this.downloadError.set(
-        apiError(normalized, 'Không thể tải PDF vé. Vui lòng thử lại.').message,
+        this.feedback.problem(normalized, 'Không thể tải PDF vé. Vui lòng thử lại.').message,
       );
   }
 }

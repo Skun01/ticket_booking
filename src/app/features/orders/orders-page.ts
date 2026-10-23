@@ -1,3 +1,4 @@
+import { LoadingState } from '../../shared/loading-state';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
@@ -8,7 +9,7 @@ import { MatSelect } from '@angular/material/select';
 import { MatOption } from '@angular/material/core';
 import { Subscription } from 'rxjs';
 import { OrderApi } from '../../core/api/catalog.api';
-import { apiError } from '../../core/api/api-error';
+import { FeedbackService } from '../../shared/feedback.service';
 import { OrderStatus, OrderSummary } from '../../core/api/models';
 import { DateTimePipe } from '../../shared/date-time.pipe';
 import { EmptyState } from '../../shared/empty-state';
@@ -20,6 +21,7 @@ import { StatusBadge } from '../../shared/status-badge';
 @Component({
   selector: 'app-orders-page',
   imports: [
+    LoadingState,
     RouterLink,
     ReactiveFormsModule,
     MatButton,
@@ -53,7 +55,7 @@ import { StatusBadge } from '../../shared/status-badge';
     </mat-form-field>
     <p class="muted">Bộ lọc áp dụng cho các đơn trên trang hiện tại, không phải toàn bộ lịch sử.</p>
     @if (loading()) {
-      <p role="status">Đang tải đơn vé…</p>
+      <app-loading-state label="Đang tải đơn vé…" />
     } @else if (error()) {
       <p class="form-notice error" role="alert">{{ error() }}</p>
       <button mat-stroked-button (click)="load(page())" type="button">Thử lại</button>
@@ -127,6 +129,7 @@ import { StatusBadge } from '../../shared/status-badge';
   `,
 })
 export class OrdersPage {
+  private readonly feedback = inject(FeedbackService);
   private readonly api = inject(OrderApi);
   private readonly destroyRef = inject(DestroyRef);
   private request?: Subscription;
@@ -163,7 +166,7 @@ export class OrdersPage {
           this.loading.set(false);
         },
         error: (error) => {
-          this.error.set(apiError(error, 'Không thể tải đơn vé của bạn.').message);
+          this.error.set(this.feedback.problem(error, 'Không thể tải đơn vé của bạn.').message);
           this.loading.set(false);
         },
       });

@@ -1,10 +1,11 @@
+import { LoadingState } from '../../shared/loading-state';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { MatButton } from '@angular/material/button';
 import { Subscription } from 'rxjs';
 import { OrganizerApi } from '../../core/api/catalog.api';
-import { apiError } from '../../core/api/api-error';
+import { FeedbackService } from '../../shared/feedback.service';
 import { EventItem } from '../../core/api/models';
 import { DateTimePipe } from '../../shared/date-time.pipe';
 import { EmptyState } from '../../shared/empty-state';
@@ -14,7 +15,16 @@ import { StatusBadge } from '../../shared/status-badge';
 
 @Component({
   selector: 'app-organizer-events-page',
-  imports: [RouterLink, MatButton, DateTimePipe, EmptyState, PageHeader, Paginator, StatusBadge],
+  imports: [
+    LoadingState,
+    RouterLink,
+    MatButton,
+    DateTimePipe,
+    EmptyState,
+    PageHeader,
+    Paginator,
+    StatusBadge,
+  ],
   template: `
     <app-page-header
       title="Sự kiện của tôi"
@@ -23,7 +33,7 @@ import { StatusBadge } from '../../shared/status-badge';
       <a mat-flat-button routerLink="/organizer/events/new">Tạo sự kiện</a>
     </app-page-header>
     @if (loading()) {
-      <p role="status">Đang tải sự kiện…</p>
+      <app-loading-state label="Đang tải sự kiện…" />
     } @else if (error()) {
       <p class="form-notice error" role="alert">{{ error() }}</p>
       <button mat-stroked-button type="button" (click)="load(page())">Thử lại</button>
@@ -101,6 +111,7 @@ import { StatusBadge } from '../../shared/status-badge';
   `,
 })
 export class OrganizerEventsPage {
+  private readonly feedback = inject(FeedbackService);
   private readonly api = inject(OrganizerApi);
   private readonly destroyRef = inject(DestroyRef);
   private request?: Subscription;
@@ -132,7 +143,7 @@ export class OrganizerEventsPage {
           this.loading.set(false);
         },
         error: (error) => {
-          this.error.set(apiError(error, 'Không tải được sự kiện của bạn.').message);
+          this.error.set(this.feedback.problem(error, 'Không tải được sự kiện của bạn.').message);
           this.loading.set(false);
         },
       });

@@ -1,10 +1,11 @@
+import { LoadingState } from '../../shared/loading-state';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { MatButton } from '@angular/material/button';
 import { Subscription, finalize, forkJoin, timeout } from 'rxjs';
 import { AdminApi } from '../../core/api/catalog.api';
-import { apiError } from '../../core/api/api-error';
+import { FeedbackService } from '../../shared/feedback.service';
 import { RevenueReport } from '../../core/api/models';
 import { DateTimePipe } from '../../shared/date-time.pipe';
 import { MoneyPipe } from '../../shared/money.pipe';
@@ -19,7 +20,7 @@ interface AdminSummary {
 
 @Component({
   selector: 'app-admin-home',
-  imports: [RouterLink, MatButton, DateTimePipe, MoneyPipe, PageHeader],
+  imports: [LoadingState, RouterLink, MatButton, DateTimePipe, MoneyPipe, PageHeader],
   template: `
     <app-page-header
       title="Tổng quan quản trị"
@@ -41,7 +42,7 @@ interface AdminSummary {
       >
     </nav>
     @if (loading()) {
-      <p role="status">Đang tải số liệu tổng quan…</p>
+      <app-loading-state label="Đang tải số liệu tổng quan…" />
     } @else if (error()) {
       <p class="form-notice error" role="alert">{{ error() }}</p>
       <p class="muted">
@@ -124,6 +125,7 @@ interface AdminSummary {
   `,
 })
 export class AdminHome {
+  private readonly feedback = inject(FeedbackService);
   private readonly api = inject(AdminApi);
   private readonly destroyRef = inject(DestroyRef);
   private request?: Subscription;
@@ -160,7 +162,8 @@ export class AdminHome {
           }),
         error: (error) =>
           this.error.set(
-            apiError(error, 'Không tải được số liệu tổng quan. Vui lòng cập nhật lại.').message,
+            this.feedback.problem(error, 'Không tải được số liệu tổng quan. Vui lòng cập nhật lại.')
+              .message,
           ),
       });
   }

@@ -1,3 +1,5 @@
+import { LoadingState } from '../../shared/loading-state';
+import { FeedbackService } from '../../shared/feedback.service';
 import { Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -13,10 +15,10 @@ import { MoneyPipe } from '../../shared/money.pipe';
 
 @Component({
   selector: 'app-event-detail-page',
-  imports: [RouterLink, MatButton, DateTimePipe, Icon, MoneyPipe],
+  imports: [LoadingState, RouterLink, MatButton, DateTimePipe, Icon, MoneyPipe],
   template: `
     @if (loading()) {
-      <p role="status" class="muted">Đang tải chi tiết sự kiện…</p>
+      <app-loading-state label="Đang tải chi tiết sự kiện…" />
     } @else if (error()) {
       <p class="form-notice error" role="alert">{{ error() }}</p>
       <a routerLink="/events" class="text-link"><app-icon name="left" /> Về danh sách sự kiện</a>
@@ -188,6 +190,7 @@ import { MoneyPipe } from '../../shared/money.pipe';
   `,
 })
 export class EventDetailPage {
+  private readonly feedback = inject(FeedbackService);
   private readonly api = inject(CatalogApi);
   private readonly route = inject(ActivatedRoute);
   protected readonly session = inject(SessionService);
@@ -221,7 +224,10 @@ export class EventDetailPage {
               this.error.set(
                 error instanceof HttpErrorResponse && error.status === 404
                   ? 'Sự kiện không tồn tại hoặc chưa được công bố.'
-                  : 'Không thể tải chi tiết sự kiện. Vui lòng tải lại trang để thử lại.',
+                  : this.feedback.problem(
+                      error,
+                      'Không thể tải chi tiết sự kiện. Vui lòng tải lại trang để thử lại.',
+                    ).message,
               );
               this.loading.set(false);
               return EMPTY;

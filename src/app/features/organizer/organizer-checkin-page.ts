@@ -17,7 +17,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { finalize, timeout } from 'rxjs';
 import { OrganizerApi } from '../../core/api/catalog.api';
-import { apiError } from '../../core/api/api-error';
+import { FeedbackService } from '../../shared/feedback.service';
 import { Ticket } from '../../core/api/models';
 import { SessionService } from '../../core/auth/session.service';
 import { DateTimePipe } from '../../shared/date-time.pipe';
@@ -225,6 +225,7 @@ import { uncertainWrite } from './organizer-utils';
   `,
 })
 export class OrganizerCheckInPage {
+  private readonly feedback = inject(FeedbackService);
   private readonly api = inject(OrganizerApi);
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
@@ -311,9 +312,10 @@ export class OrganizerCheckInPage {
             return;
           }
           this.ticket.set(ticket);
+          this.feedback.success('Đã xác nhận check-in vé.');
         },
         error: (error: unknown) => {
-          const problem = apiError(
+          const problem = this.feedback.problem(
             error,
             'Không xác nhận được check-in. Vui lòng kiểm tra kết nối và đối soát tại cổng.',
           );

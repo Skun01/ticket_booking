@@ -1,3 +1,5 @@
+import { FocusOnShow } from '../../shared/focus-on-show';
+import { LoadingState } from '../../shared/loading-state';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
@@ -18,7 +20,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { Observable, Subscription, distinctUntilChanged, finalize, map, timeout } from 'rxjs';
 import { AdminApi } from '../../core/api/catalog.api';
-import { apiError } from '../../core/api/api-error';
+import { FeedbackService } from '../../shared/feedback.service';
 import { PageResponse } from '../../core/api/models';
 import { EmptyState } from '../../shared/empty-state';
 import { PageHeader } from '../../shared/page-header';
@@ -38,6 +40,8 @@ type CatalogKind = 'categories' | 'venues';
 @Component({
   selector: 'app-admin-catalog-page',
   imports: [
+    FocusOnShow,
+    LoadingState,
     ReactiveFormsModule,
     MatButton,
     MatFormField,
@@ -81,7 +85,7 @@ type CatalogKind = 'categories' | 'venues';
       </p>
     }
     @if (detailLoading()) {
-      <p role="status">Đang tải dữ liệu mới nhất để chỉnh sửa…</p>
+      <app-loading-state label="Đang tải dữ liệu mới nhất để chỉnh sửa…" />
     }
     @if (editorOpen()) {
       <section class="panel editor" aria-labelledby="catalog-editor-title">
@@ -159,7 +163,7 @@ type CatalogKind = 'categories' | 'venues';
       </section>
     }
     @if (confirmDelete(); as item) {
-      <section class="panel" role="group" aria-labelledby="delete-title">
+      <section class="panel" role="group" appFocusOnShow aria-labelledby="delete-title">
         <h2 id="delete-title">Xác nhận xóa {{ isCategory() ? 'danh mục' : 'địa điểm' }}</h2>
         <p>
           Xóa “{{ item.name }}” (ID {{ item.id }})? Không thể xóa nếu dữ liệu đang được sự kiện sử
@@ -187,7 +191,7 @@ type CatalogKind = 'categories' | 'venues';
       </section>
     }
     @if (loading()) {
-      <p class="loading" role="status">Đang tải danh sách…</p>
+      <app-loading-state label="Đang tải danh sách…" />
     } @else if (listError()) {
       <p class="form-notice error" role="alert">{{ listError() }}</p>
       <button
@@ -330,6 +334,7 @@ type CatalogKind = 'categories' | 'venues';
   `,
 })
 export class AdminCatalogPage {
+  private readonly feedback = inject(FeedbackService);
   private readonly api = inject(AdminApi);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
@@ -430,7 +435,7 @@ export class AdminCatalogPage {
         },
         error: (error) => {
           this.listError.set(
-            apiError(error, 'Không tải được danh sách. Vui lòng thử lại.').message,
+            this.feedback.problem(error, 'Không tải được danh sách. Vui lòng thử lại.').message,
           );
           this.mustRefresh.set(true);
         },
@@ -484,7 +489,9 @@ export class AdminCatalogPage {
           this.focusEditor();
         },
         error: (error) => {
-          this.error.set(apiError(error, 'Không tải được dữ liệu để chỉnh sửa.').message);
+          this.error.set(
+            this.feedback.problem(error, 'Không tải được dữ liệu để chỉnh sửa.').message,
+          );
           this.mustRefresh.set(true);
         },
       });
@@ -559,6 +566,7 @@ export class AdminCatalogPage {
           this.busy.set(false);
           this.closeEditor();
           this.notice.set(id ? 'Đã cập nhật dữ liệu.' : 'Đã tạo dữ liệu mới.');
+          this.feedback.success(this.notice());
           this.load(id ? this.page() : 0);
         },
         error: (error) => this.writeError(error),
@@ -584,6 +592,7 @@ export class AdminCatalogPage {
           this.busy.set(false);
           this.confirmDelete.set(null);
           this.notice.set('Đã xóa dữ liệu.');
+          this.feedback.success(this.notice());
           this.load(this.page());
         },
         error: (error) => this.writeError(error),
@@ -600,7 +609,10 @@ export class AdminCatalogPage {
   }
 
   private writeError(error: unknown): void {
-    const problem = apiError(error, 'Không xác nhận được kết quả lưu/xóa. Vui lòng kiểm tra lại.');
+    const problem = this.feedback.problem(
+      error,
+      'Không xác nhận được kết quả lưu/xóa. Vui lòng kiểm tra lại.',
+    );
     this.error.set(problem.message);
     this.fieldErrors.set(
       Object.entries(problem.fields).map(([field, message]) => ({ field, message })),

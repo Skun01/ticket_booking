@@ -1,3 +1,5 @@
+import { FocusOnShow } from '../../shared/focus-on-show';
+import { LoadingState } from '../../shared/loading-state';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -7,7 +9,7 @@ import { MatButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { Subscription, distinctUntilChanged, finalize, interval, map } from 'rxjs';
 import { OrderApi } from '../../core/api/catalog.api';
-import { apiError } from '../../core/api/api-error';
+import { FeedbackService } from '../../shared/feedback.service';
 import { Order } from '../../core/api/models';
 import { SessionService } from '../../core/auth/session.service';
 import { DateTimePipe } from '../../shared/date-time.pipe';
@@ -18,6 +20,8 @@ import { StatusBadge } from '../../shared/status-badge';
 @Component({
   selector: 'app-order-detail-page',
   imports: [
+    FocusOnShow,
+    LoadingState,
     RouterLink,
     ReactiveFormsModule,
     MatButton,
@@ -46,7 +50,7 @@ import { StatusBadge } from '../../shared/status-badge';
       <p class="form-notice success" role="status">{{ notice() }}</p>
     }
     @if (loading()) {
-      <p role="status">Đang tải đơn vé…</p>
+      <app-loading-state label="Đang tải đơn vé…" />
     } @else if (order(); as order) {
       <section class="panel">
         <div class="order-heading">
@@ -128,7 +132,7 @@ import { StatusBadge } from '../../shared/status-badge';
             </button>
           </div>
           @if (confirmCancel()) {
-            <div class="form-notice" role="group" aria-label="Xác nhận hủy đơn">
+            <div class="form-notice" role="group" appFocusOnShow aria-label="Xác nhận hủy đơn">
               <p>Hủy đơn này và trả lại số vé đang giữ chỗ?</p>
               <div class="form-actions">
                 <button
@@ -238,6 +242,7 @@ import { StatusBadge } from '../../shared/status-badge';
   `,
 })
 export class OrderDetailPage {
+  private readonly feedback = inject(FeedbackService);
   private readonly api = inject(OrderApi);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
@@ -354,7 +359,10 @@ export class OrderDetailPage {
         },
         error: (error: unknown) => {
           this.error.set(
-            apiError(error, 'Không thể xác nhận trạng thái đơn. Vui lòng cập nhật lại.').message,
+            this.feedback.problem(
+              error,
+              'Không thể xác nhận trạng thái đơn. Vui lòng cập nhật lại.',
+            ).message,
           );
           this.needsRefresh.set(true);
           this.authRequired.set(error instanceof HttpErrorResponse && error.status === 401);
@@ -401,11 +409,14 @@ export class OrderDetailPage {
                 ? 'Đã hủy đơn và trả lại vé giữ chỗ.'
                 : 'Đơn đã hết hạn giữ chỗ.',
           );
+          if (result.status === 'PAID' || result.status === 'CANCELLED')
+            this.feedback.success(this.notice());
+          else this.feedback.info(this.notice());
         },
         error: (error: unknown) => {
           this.busy.set(false);
           this.error.set(
-            apiError(
+            this.feedback.problem(
               error,
               'Chưa xác nhận được kết quả thao tác. Vui lòng cập nhật đơn trước khi thử lại.',
             ).message,

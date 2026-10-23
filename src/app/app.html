@@ -1,4 +1,13 @@
 @if (session.loading()) {
   <div class="connection-note" role="status">Đang kiểm tra phiên đăng nhập…</div>
 }
+@if (navigation.navigating()) {
+  <div class="connection-note"><app-loading-state label="Đang mở trang…" /></div>
+}
+@if (navigation.navigationFailed()) {
+  <div class="form-notice error" role="alert">
+    Không mở được trang. Kiểm tra kết nối rồi
+    <button type="button" (click)="reload()">tải lại trang</button>.
+  </div>
+}
 <router-outlet />

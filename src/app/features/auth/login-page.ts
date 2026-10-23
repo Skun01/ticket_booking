@@ -1,12 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, UrlTree } from '@angular/router';
 import { MatButton } from '@angular/material/button';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
-import { apiError } from '../../core/api/api-error';
-import { postLoginRoute } from '../../core/auth/home-route';
+import { FeedbackService } from '../../shared/feedback.service';
+import { homeRouteFor, postLoginRoute } from '../../core/auth/home-route';
 import { SessionService } from '../../core/auth/session.service';
 import { Icon } from '../../shared/icon';
 
@@ -46,12 +46,10 @@ import { Icon } from '../../shared/icon';
           >.
         </p>
         <div class="form-actions">
-          @if (session.isAdmin()) {
-            <a mat-flat-button routerLink="/admin">Vào khu vực quản trị</a>
-          } @else {
-            <a mat-flat-button routerLink="/">Về trang chủ</a>
-          }
-          <button mat-stroked-button type="button" (click)="logout()">Đăng xuất</button>
+          <a mat-flat-button [routerLink]="homeRoute()">Tiếp tục vào khu vực của bạn</a>
+          <button mat-stroked-button type="button" (click)="logout()" [disabled]="signingOut()">
+            Đăng xuất
+          </button>
         </div>
       } @else {
         <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
@@ -88,7 +86,7 @@ import { Icon } from '../../shared/icon';
           <button
             mat-flat-button
             type="submit"
-            [disabled]="busy() || session.loading()"
+            [disabled]="busy() || signingOut() || session.loading()"
             [attr.aria-busy]="busy()"
           >
             <app-icon name="login" /> {{ busy() ? 'Đang xử lý…' : 'Đăng nhập' }}
@@ -105,10 +103,16 @@ import { Icon } from '../../shared/icon';
   `,
 })
 export class LoginPage {
+  private readonly feedback = inject(FeedbackService);
   protected readonly session = inject(SessionService);
   private readonly router = inject(Router);
   protected readonly returnUrl = inject(ActivatedRoute).snapshot.queryParamMap.get('returnUrl');
   protected readonly busy = signal(false);
+  protected readonly signingOut = signal(false);
+  protected homeRoute(): UrlTree {
+    const user = this.session.user();
+    return this.router.parseUrl(user ? postLoginRoute(user, this.returnUrl) : homeRouteFor(user));
+  }
   protected readonly error = signal('');
   protected readonly fieldErrors = signal<Record<string, string>>({});
 
@@ -140,20 +144,24 @@ export class LoginPage {
   }
 
   protected async submit(): Promise<void> {
-    if (this.busy() || this.session.loading()) return;
+    if (this.busy() || this.signingOut() || this.session.loading()) return;
     this.form.markAllAsTouched();
     this.error.set('');
     this.fieldErrors.set({});
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      document.querySelector<HTMLElement>('form .ng-invalid input, form input.ng-invalid')?.focus();
+      return;
+    }
 
     this.busy.set(true);
     try {
       const { email, password } = this.form.getRawValue();
       const user = await this.session.login(email.trim(), password);
       this.form.controls.password.reset();
+      this.feedback.success('Đã đăng nhập.');
       await this.router.navigateByUrl(postLoginRoute(user, this.returnUrl));
     } catch (err) {
-      const problem = apiError(err);
+      const problem = this.feedback.problem(err);
       this.error.set(problem.message);
       this.fieldErrors.set(problem.fields);
     } finally {
@@ -162,6 +170,18 @@ export class LoginPage {
   }
 
   protected async logout(): Promise<void> {
-    await this.session.logout();
+    if (this.signingOut()) return;
+    this.signingOut.set(true);
+    try {
+      await this.session.logout();
+      this.feedback.success('Đã đăng xuất.');
+    } catch {
+      this.feedback.error(
+        'Đã xóa phiên trên thiết bị nhưng chưa xác nhận đăng xuất trên máy chủ. Kiểm tra kết nối trước khi tiếp tục.',
+        true,
+      );
+    } finally {
+      this.signingOut.set(false);
+    }
   }
 }

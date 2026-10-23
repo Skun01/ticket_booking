@@ -1,3 +1,4 @@
+import { LoadingState } from '../../shared/loading-state';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -5,7 +6,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButton } from '@angular/material/button';
 import { Subscription, distinctUntilChanged, finalize, map, timeout } from 'rxjs';
 import { OrganizerApi } from '../../core/api/catalog.api';
-import { apiError } from '../../core/api/api-error';
+import { FeedbackService } from '../../shared/feedback.service';
 import { EventReport } from '../../core/api/models';
 import { MoneyPipe } from '../../shared/money.pipe';
 import { PageHeader } from '../../shared/page-header';
@@ -15,7 +16,7 @@ import { positiveId } from './organizer-utils';
 
 @Component({
   selector: 'app-organizer-event-report-page',
-  imports: [RouterLink, MatButton, MoneyPipe, PageHeader, RevenueChart],
+  imports: [LoadingState, RouterLink, MatButton, MoneyPipe, PageHeader, RevenueChart],
   template: `
     <app-page-header
       title="Báo cáo sự kiện"
@@ -27,7 +28,7 @@ import { positiveId } from './organizer-utils';
       }
     </app-page-header>
     @if (loading()) {
-      <p role="status">Đang tải báo cáo…</p>
+      <app-loading-state label="Đang tải báo cáo…" />
     } @else if (error()) {
       <p class="form-notice error" role="alert">{{ error() }}</p>
       @if (id()) {
@@ -159,6 +160,7 @@ import { positiveId } from './organizer-utils';
   `,
 })
 export class OrganizerEventReportPage {
+  private readonly feedback = inject(FeedbackService);
   private readonly api = inject(OrganizerApi);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
@@ -217,7 +219,7 @@ export class OrganizerEventReportPage {
             dailyRevenue: [...report.dailyRevenue].sort((a, b) => a.date.localeCompare(b.date)),
           }),
         error: (error) =>
-          this.error.set(apiError(error, 'Không tải được báo cáo sự kiện.').message),
+          this.error.set(this.feedback.problem(error, 'Không tải được báo cáo sự kiện.').message),
       });
   }
 
@@ -239,10 +241,12 @@ export class OrganizerEventReportPage {
         next: (blob) => {
           if (!blob.size || !blob.type.includes('application/pdf')) {
             this.downloadError.set('Máy chủ không trả về PDF hợp lệ.');
+            this.feedback.error(this.downloadError());
             return;
           }
           saveBlob(blob, `event-${id}-revenue.pdf`);
           this.notice.set('Đã gửi yêu cầu tải báo cáo. Kiểm tra mục tải xuống của trình duyệt.');
+          this.feedback.info(this.notice());
         },
         error: (error) => {
           void this.showDownloadError(error, attempt);
@@ -264,7 +268,7 @@ export class OrganizerEventReportPage {
     }
     if (!this.destroyRef.destroyed && attempt === this.downloadAttempt) {
       this.downloadError.set(
-        apiError(normalized, 'Không tải được PDF báo cáo. Vui lòng thử lại.').message,
+        this.feedback.problem(normalized, 'Không tải được PDF báo cáo. Vui lòng thử lại.').message,
       );
     }
   }

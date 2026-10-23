@@ -1,3 +1,4 @@
+import { FocusOnShow } from '../../shared/focus-on-show';
 import { Component, DestroyRef, effect, inject, input, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
@@ -6,15 +7,15 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { finalize, timeout } from 'rxjs';
 import { OrganizerApi } from '../../core/api/catalog.api';
-import { apiError } from '../../core/api/api-error';
+import { FeedbackService } from '../../shared/feedback.service';
 import { EventItem, TicketType, TicketTypeRequest } from '../../core/api/models';
 import { uncertainWrite, vietnamDateInput, vietnamInstant } from './organizer-utils';
 
 @Component({
   selector: 'app-ticket-type-editor',
-  imports: [ReactiveFormsModule, MatButton, MatFormField, MatLabel, MatInput],
+  imports: [FocusOnShow, ReactiveFormsModule, MatButton, MatFormField, MatLabel, MatInput],
   template: `
-    <section class="panel" aria-labelledby="ticket-editor-title">
+    <section class="panel" appFocusOnShow aria-labelledby="ticket-editor-title">
       <h2 id="ticket-editor-title">{{ ticketType() ? 'Sửa hạng vé' : 'Thêm hạng vé' }}</h2>
       <p class="muted">
         Tổng số vé mọi hạng không được vượt {{ event().venue.capacity }} chỗ của địa điểm. Nhập giờ
@@ -125,6 +126,7 @@ import { uncertainWrite, vietnamDateInput, vietnamInstant } from './organizer-ut
   `,
 })
 export class TicketTypeEditor {
+  private readonly feedback = inject(FeedbackService);
   readonly event = input.required<EventItem>();
   readonly ticketType = input<TicketType | null>(null);
   readonly allTypes = input.required<TicketType[]>();
@@ -249,7 +251,10 @@ export class TicketTypeEditor {
           this.saved.emit(result);
         },
         error: (error) => {
-          const problem = apiError(error, 'Không lưu được hạng vé. Vui lòng kiểm tra lại.');
+          const problem = this.feedback.problem(
+            error,
+            'Không lưu được hạng vé. Vui lòng kiểm tra lại.',
+          );
           this.error.set(problem.message);
           this.fieldErrors.set(
             Object.entries(problem.fields).map(([field, message]) => ({ field, message })),

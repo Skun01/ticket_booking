@@ -1,4 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
+import { LoadingState } from '../../shared/loading-state';
+import { FeedbackService } from '../../shared/feedback.service';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,7 +12,7 @@ import { Icon } from '../../shared/icon';
 
 @Component({
   selector: 'app-home-page',
-  imports: [RouterLink, MatButtonModule, Icon, DateTimePipe],
+  imports: [LoadingState, RouterLink, MatButtonModule, Icon, DateTimePipe],
   template: `
     <section class="intro-section">
       <p class="eyebrow">NỀN TẢNG BÁN VÉ SỰ KIỆN</p>
@@ -22,6 +24,12 @@ import { Icon } from '../../shared/icon';
         <a mat-flat-button routerLink="/events"><app-icon name="search" /> Khám phá sự kiện</a>
         @if (!session.isAuthenticated()) {
           <a mat-stroked-button routerLink="/register"><app-icon name="user" /> Tạo tài khoản</a>
+        } @else if (session.isCustomer()) {
+          <a mat-stroked-button routerLink="/tickets">Vé của tôi</a>
+        } @else if (session.isOrganizer()) {
+          <a mat-stroked-button routerLink="/organizer">Quản lý sự kiện của tôi</a>
+        } @else if (session.isAdmin()) {
+          <a mat-stroked-button routerLink="/admin">Tổng quan quản trị</a>
         }
       </div>
     </section>
@@ -32,9 +40,10 @@ import { Icon } from '../../shared/icon';
         <a routerLink="/events" class="muted">Xem tất cả →</a>
       </div>
       @if (loading()) {
-        <p role="status" class="muted">Đang tải sự kiện…</p>
+        <app-loading-state label="Đang tải sự kiện…" />
       } @else if (error()) {
         <p class="form-notice error" role="alert">{{ error() }}</p>
+        <button mat-stroked-button type="button" (click)="load()">Thử lại</button>
       } @else if (featured().length === 0) {
         <p class="muted">Hiện chưa có sự kiện nào được công bố.</p>
       } @else {
@@ -148,6 +157,8 @@ import { Icon } from '../../shared/icon';
   `,
 })
 export class HomePage {
+  private readonly feedback = inject(FeedbackService);
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly session = inject(SessionService);
   private readonly api = inject(CatalogApi);
 
@@ -156,16 +167,25 @@ export class HomePage {
   protected readonly error = signal('');
 
   constructor() {
+    this.load();
+  }
+
+  protected load(): void {
+    if (this.loading() && this.featured().length) return;
+    this.loading.set(true);
+    this.error.set('');
     this.api
       .listEvents({ from: new Date().toISOString() }, { page: 0, size: 6 })
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
           this.featured.set(res.content);
           this.loading.set(false);
         },
-        error: () => {
-          this.error.set('Không thể tải sự kiện. Vui lòng tải lại trang để thử lại.');
+        error: (error) => {
+          this.error.set(
+            this.feedback.problem(error, 'Không thể tải sự kiện. Vui lòng thử lại.').message,
+          );
           this.loading.set(false);
         },
       });

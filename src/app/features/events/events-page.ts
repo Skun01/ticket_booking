@@ -1,3 +1,6 @@
+import { LoadingState } from '../../shared/loading-state';
+import { FeedbackService } from '../../shared/feedback.service';
+import { vietnamInstant } from '../../shared/vietnam-time';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EMPTY, expand, reduce, Subscription } from 'rxjs';
@@ -19,6 +22,7 @@ import { Paginator } from '../../shared/paginator';
 @Component({
   selector: 'app-events-page',
   imports: [
+    LoadingState,
     ReactiveFormsModule,
     RouterLink,
     MatButton,
@@ -43,6 +47,7 @@ import { Paginator } from '../../shared/paginator';
     @if (categoryError()) {
       <p class="form-notice warning" role="status">{{ categoryError() }}</p>
     }
+    <p id="event-filter-time-help" class="muted">Thời gian lọc nhập theo giờ Việt Nam (UTC+7).</p>
     <form class="filter-bar" [formGroup]="filterForm" (ngSubmit)="applyFilter()">
       <mat-form-field appearance="outline">
         <mat-label>Danh mục</mat-label>
@@ -59,11 +64,21 @@ import { Paginator } from '../../shared/paginator';
       </mat-form-field>
       <mat-form-field appearance="outline">
         <mat-label>Từ ngày</mat-label>
-        <input matInput type="datetime-local" formControlName="from" />
+        <input
+          matInput
+          type="datetime-local"
+          formControlName="from"
+          aria-describedby="event-filter-time-help"
+        />
       </mat-form-field>
       <mat-form-field appearance="outline">
         <mat-label>Đến ngày</mat-label>
-        <input matInput type="datetime-local" formControlName="to" />
+        <input
+          matInput
+          type="datetime-local"
+          formControlName="to"
+          aria-describedby="event-filter-time-help"
+        />
       </mat-form-field>
       <div class="filter-actions">
         <button mat-flat-button type="submit"><app-icon name="search" /> Lọc</button>
@@ -75,7 +90,7 @@ import { Paginator } from '../../shared/paginator';
       <p class="form-notice error" role="alert">{{ filterError() }}</p>
     }
     @if (loading()) {
-      <p role="status" class="muted">Đang tải sự kiện…</p>
+      <app-loading-state label="Đang tải sự kiện…" />
     } @else if (error()) {
       <p class="form-notice error" role="alert">{{ error() }}</p>
       <button mat-stroked-button type="button" (click)="load()">Thử lại</button>
@@ -216,6 +231,7 @@ import { Paginator } from '../../shared/paginator';
   `,
 })
 export class EventsPage {
+  private readonly feedback = inject(FeedbackService);
   private readonly api = inject(CatalogApi);
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
@@ -265,11 +281,11 @@ export class EventsPage {
   protected applyFilter(): void {
     this.filterError.set('');
     const { from, to } = this.filterForm.getRawValue();
-    if ((from && !Number.isFinite(Date.parse(from))) || (to && !Number.isFinite(Date.parse(to)))) {
+    if ((from && !vietnamInstant(from)) || (to && !vietnamInstant(to))) {
       this.filterError.set('Vui lòng nhập ngày giờ hợp lệ.');
       return;
     }
-    if (from && to && Date.parse(from) > Date.parse(to)) {
+    if (from && to && Date.parse(vietnamInstant(from)!) > Date.parse(vietnamInstant(to)!)) {
       this.filterError.set('Thời gian bắt đầu phải trước hoặc bằng thời gian kết thúc.');
       return;
     }
@@ -305,8 +321,11 @@ export class EventsPage {
           this.totalPages.set(res.totalPages);
           this.loading.set(false);
         },
-        error: () => {
-          this.error.set('Không thể tải danh sách sự kiện. Vui lòng thử lại.');
+        error: (error) => {
+          this.error.set(
+            this.feedback.problem(error, 'Không thể tải danh sách sự kiện. Vui lòng thử lại.')
+              .message,
+          );
           this.loading.set(false);
         },
       });
@@ -317,8 +336,8 @@ export class EventsPage {
     return {
       categoryId: categoryId ?? undefined,
       city: city.trim() || undefined,
-      from: from ? new Date(from).toISOString() : undefined,
-      to: to ? new Date(to).toISOString() : undefined,
+      from: from ? vietnamInstant(from)! : undefined,
+      to: to ? vietnamInstant(to)! : undefined,
     };
   }
 }

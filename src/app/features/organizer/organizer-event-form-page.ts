@@ -1,3 +1,4 @@
+import { LoadingState } from '../../shared/loading-state';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -10,7 +11,7 @@ import { MatSelect } from '@angular/material/select';
 import { MatOption } from '@angular/material/core';
 import { EMPTY, Subscription, expand, finalize, forkJoin, of, reduce, timeout } from 'rxjs';
 import { CatalogApi, OrganizerApi } from '../../core/api/catalog.api';
-import { apiError } from '../../core/api/api-error';
+import { FeedbackService } from '../../shared/feedback.service';
 import { Category, EventItem, EventRequest, Venue } from '../../core/api/models';
 import { PageHeader } from '../../shared/page-header';
 import { positiveId, uncertainWrite, vietnamDateInput, vietnamInstant } from './organizer-utils';
@@ -18,6 +19,7 @@ import { positiveId, uncertainWrite, vietnamDateInput, vietnamInstant } from './
 @Component({
   selector: 'app-organizer-event-form-page',
   imports: [
+    LoadingState,
     RouterLink,
     ReactiveFormsModule,
     MatButton,
@@ -36,7 +38,7 @@ import { positiveId, uncertainWrite, vietnamDateInput, vietnamInstant } from './
       <a mat-stroked-button routerLink="/organizer">Sự kiện của tôi</a>
     </app-page-header>
     @if (loading()) {
-      <p role="status">Đang tải thông tin và danh mục…</p>
+      <app-loading-state label="Đang tải thông tin và danh mục…" />
     } @else if (loadError()) {
       <p class="form-notice error" role="alert">{{ loadError() }}</p>
       @if (!invalidRoute()) {
@@ -158,6 +160,7 @@ import { positiveId, uncertainWrite, vietnamDateInput, vietnamInstant } from './
   `,
 })
 export class OrganizerEventFormPage {
+  private readonly feedback = inject(FeedbackService);
   private readonly api = inject(OrganizerApi);
   private readonly catalog = inject(CatalogApi);
   private readonly route = inject(ActivatedRoute);
@@ -265,7 +268,7 @@ export class OrganizerEventFormPage {
         },
         error: (error) =>
           this.loadError.set(
-            apiError(error, 'Không tải được dữ liệu form. Vui lòng thử lại.').message,
+            this.feedback.problem(error, 'Không tải được dữ liệu form. Vui lòng thử lại.').message,
           ),
       });
   }
@@ -328,11 +331,15 @@ export class OrganizerEventFormPage {
       )
       .subscribe({
         next: (event) => {
+          this.feedback.success(id ? 'Đã lưu thay đổi sự kiện.' : 'Đã tạo bản nháp sự kiện.');
           this.uncertain.set(true);
           void this.router.navigate(['/organizer/events', event.id]);
         },
         error: (error) => {
-          const problem = apiError(error, 'Không lưu được sự kiện. Vui lòng kiểm tra lại.');
+          const problem = this.feedback.problem(
+            error,
+            'Không lưu được sự kiện. Vui lòng kiểm tra lại.',
+          );
           this.error.set(problem.message);
           this.fieldErrors.set(
             Object.entries(problem.fields).map(([field, message]) => ({ field, message })),

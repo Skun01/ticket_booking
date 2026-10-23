@@ -1,3 +1,4 @@
+import { LoadingState } from '../../shared/loading-state';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
@@ -6,7 +7,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { Subscription, finalize, timeout } from 'rxjs';
 import { AdminApi } from '../../core/api/catalog.api';
-import { apiError } from '../../core/api/api-error';
+import { FeedbackService } from '../../shared/feedback.service';
 import { RevenueReport } from '../../core/api/models';
 import { DateTimePipe } from '../../shared/date-time.pipe';
 import { MoneyPipe } from '../../shared/money.pipe';
@@ -17,6 +18,7 @@ import { recentRevenueRange, vietnamDateInput, vietnamInstant } from '../../shar
 @Component({
   selector: 'app-admin-reports-page',
   imports: [
+    LoadingState,
     ReactiveFormsModule,
     MatButton,
     MatFormField,
@@ -71,7 +73,7 @@ import { recentRevenueRange, vietnamDateInput, vietnamInstant } from '../../shar
       }
     </section>
     @if (loading()) {
-      <p class="loading" role="status">Đang tổng hợp báo cáo…</p>
+      <app-loading-state label="Đang tổng hợp báo cáo…" />
     } @else if (error()) {
       <p class="form-notice error" role="alert">{{ error() }}</p>
       <button mat-stroked-button type="button" (click)="retry()">Thử lại khoảng vừa yêu cầu</button>
@@ -243,6 +245,7 @@ import { recentRevenueRange, vietnamDateInput, vietnamInstant } from '../../shar
   `,
 })
 export class AdminReportsPage {
+  private readonly feedback = inject(FeedbackService);
   private readonly api = inject(AdminApi);
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
@@ -310,7 +313,8 @@ export class AdminReportsPage {
           }),
         error: (error) =>
           this.error.set(
-            apiError(error, 'Không tải được báo cáo doanh thu. Vui lòng thử lại.').message,
+            this.feedback.problem(error, 'Không tải được báo cáo doanh thu. Vui lòng thử lại.')
+              .message,
           ),
       });
   }

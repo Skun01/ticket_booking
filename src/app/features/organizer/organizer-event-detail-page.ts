@@ -1,3 +1,5 @@
+import { FocusOnShow } from '../../shared/focus-on-show';
+import { LoadingState } from '../../shared/loading-state';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -12,7 +14,7 @@ import {
   timeout,
 } from 'rxjs';
 import { OrganizerApi } from '../../core/api/catalog.api';
-import { apiError } from '../../core/api/api-error';
+import { FeedbackService } from '../../shared/feedback.service';
 import { EventItem, EventStatus, TicketType } from '../../core/api/models';
 import { DateTimePipe } from '../../shared/date-time.pipe';
 import { MoneyPipe } from '../../shared/money.pipe';
@@ -24,6 +26,8 @@ import { TicketTypeEditor } from './ticket-type-editor';
 @Component({
   selector: 'app-organizer-event-detail-page',
   imports: [
+    FocusOnShow,
+    LoadingState,
     RouterLink,
     MatButton,
     DateTimePipe,
@@ -43,7 +47,7 @@ import { TicketTypeEditor } from './ticket-type-editor';
       <p class="form-notice success" role="status">{{ notice() }}</p>
     }
     @if (loading()) {
-      <p role="status">Đang tải sự kiện và hạng vé…</p>
+      <app-loading-state label="Đang tải sự kiện và hạng vé…" />
     } @else if (event(); as ev) {
       <section class="panel event-info">
         <app-status-badge [status]="ev.status" />
@@ -128,7 +132,7 @@ import { TicketTypeEditor } from './ticket-type-editor';
           }
         </div>
         @if (confirmStatus(); as status) {
-          <div class="form-notice" role="group" aria-label="Xác nhận đổi trạng thái">
+          <div class="form-notice" role="group" appFocusOnShow aria-label="Xác nhận đổi trạng thái">
             <p>
               {{
                 status === 'PUBLISHED'
@@ -278,6 +282,7 @@ import { TicketTypeEditor } from './ticket-type-editor';
   `,
 })
 export class OrganizerEventDetailPage {
+  private readonly feedback = inject(FeedbackService);
   private readonly api = inject(OrganizerApi);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
@@ -353,7 +358,7 @@ export class OrganizerEventDetailPage {
           this.needsRefresh.set(false);
         },
         error: (error) => {
-          this.error.set(apiError(error, 'Không tải được cấu hình sự kiện.').message);
+          this.error.set(this.feedback.problem(error, 'Không tải được cấu hình sự kiện.').message);
           this.needsRefresh.set(true);
         },
       });
@@ -391,10 +396,11 @@ export class OrganizerEventDetailPage {
           this.confirmStatus.set(null);
           this.editing.set(undefined);
           this.notice.set('Đã cập nhật trạng thái sự kiện.');
+          this.feedback.success(this.notice());
         },
         error: (error) => {
           this.error.set(
-            apiError(
+            this.feedback.problem(
               error,
               'Chưa xác nhận được kết quả đổi trạng thái. Hãy cập nhật sự kiện trước khi thử lại.',
             ).message,
@@ -414,5 +420,6 @@ export class OrganizerEventDetailPage {
     this.editing.set(undefined);
     this.editorBusy.set(false);
     this.notice.set('Đã lưu hạng vé.');
+    this.feedback.success(this.notice());
   }
 }

@@ -3,12 +3,14 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { MatButton } from '@angular/material/button';
 import { SessionService } from '../core/auth/session.service';
 import { Icon } from '../shared/icon';
+import { SkipLink } from '../shared/skip-link';
+import { FeedbackService } from '../shared/feedback.service';
 
 @Component({
   selector: 'app-organizer-layout',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, MatButton, Icon],
+  imports: [SkipLink, RouterLink, RouterLinkActive, RouterOutlet, MatButton, Icon],
   template: `
-    <a class="skip-link" href="#organizer-content">Đến nội dung tổ chức</a>
+    <a appSkipLink class="skip-link" href="#organizer-content">Đến nội dung tổ chức</a>
     <div class="admin-shell">
       <aside class="admin-sidebar">
         <a class="brand" routerLink="/"
@@ -19,14 +21,19 @@ import { Icon } from '../shared/icon';
           <a
             routerLink="/organizer"
             routerLinkActive="active"
+            ariaCurrentWhenActive="page"
             [routerLinkActiveOptions]="{ exact: true }"
           >
             <app-icon name="list" /> Sự kiện của tôi
           </a>
-          <a routerLink="/organizer/checkin" routerLinkActive="active">
+          <a routerLink="/organizer/checkin" routerLinkActive="active" ariaCurrentWhenActive="page">
             <app-icon name="check" /> Check-in vé
           </a>
-          <a routerLink="/organizer/events/new" routerLinkActive="active">
+          <a
+            routerLink="/organizer/events/new"
+            routerLinkActive="active"
+            ariaCurrentWhenActive="page"
+          >
             <app-icon name="calendar" /> Tạo sự kiện
           </a>
           <a routerLink="/"><app-icon name="left" /> Về trang chủ</a>
@@ -61,6 +68,7 @@ export class OrganizerLayout {
   protected readonly session = inject(SessionService);
   protected readonly signingOut = signal(false);
   private readonly router = inject(Router);
+  private readonly feedback = inject(FeedbackService);
 
   constructor() {
     effect(() => {
@@ -75,9 +83,15 @@ export class OrganizerLayout {
     this.signingOut.set(true);
     try {
       await this.session.logout();
+      this.feedback.success('Đã đăng xuất.');
+    } catch {
+      this.feedback.error(
+        'Đã xóa phiên trên thiết bị nhưng chưa xác nhận đăng xuất trên máy chủ. Kiểm tra kết nối trước khi tiếp tục.',
+        true,
+      );
     } finally {
-      this.signingOut.set(false);
       await this.router.navigate(['/login']);
+      this.signingOut.set(false);
     }
   }
 }

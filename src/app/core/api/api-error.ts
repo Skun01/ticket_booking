@@ -1,4 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { TimeoutError } from 'rxjs';
 
 export interface ApiProblem {
   code?: string;
@@ -78,20 +79,40 @@ export function apiError(
   error: unknown,
   fallback = 'Không thể kết nối đến máy chủ. Vui lòng thử lại.',
 ): FormApiError {
-  if (error instanceof HttpErrorResponse && error.error && typeof error.error === 'object') {
-    const problem = error.error as ApiProblem;
-    const fields: Record<string, string> = {};
-    if (Array.isArray(problem.errors)) {
-      for (const err of problem.errors) {
-        if (err.field && !fields[err.field]) {
-          fields[err.field] = fieldMessages[err.field] || err.message;
-        }
+  if (error instanceof TimeoutError)
+    return {
+      message:
+        'Hết thời gian chờ phản hồi. Nếu vừa gửi thao tác, hãy kiểm tra kết quả trước khi gửi lại.',
+      fields: {},
+    };
+  if (!(error instanceof HttpErrorResponse)) return { message: fallback, fields: {} };
+  const problem: ApiProblem = error.error && typeof error.error === 'object' ? error.error : {};
+  const fields: Record<string, string> = {};
+  if (Array.isArray(problem.errors)) {
+    for (const err of problem.errors) {
+      if (
+        err &&
+        typeof err.field === 'string' &&
+        typeof err.message === 'string' &&
+        !Object.hasOwn(fields, err.field)
+      ) {
+        // Không tin tên field/code từ response như thuộc tính prototype của object.
+        if (['__proto__', 'constructor', 'prototype'].includes(err.field)) continue;
+        fields[err.field] = Object.hasOwn(fieldMessages, err.field)
+          ? fieldMessages[err.field]
+          : err.message;
       }
     }
-    const message =
-      (problem.code && codeMessages[problem.code]) ||
-      (error.status === 401 ? 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.' : fallback);
-    return { message, fields };
   }
-  return { message: fallback, fields: {} };
+  const statusMessages: Record<number, string> = {
+    0: 'Không kết nối được máy chủ. Kiểm tra mạng và thử tải lại dữ liệu.',
+    401: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',
+    403: 'Bạn không có quyền thực hiện thao tác này.',
+    429: 'Bạn đang gửi yêu cầu quá nhanh. Vui lòng chờ một lúc trước khi thử lại.',
+  };
+  const codeMessage =
+    typeof problem.code === 'string' && Object.hasOwn(codeMessages, problem.code)
+      ? codeMessages[problem.code]
+      : '';
+  return { message: codeMessage || statusMessages[error.status] || fallback, fields };
 }

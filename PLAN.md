@@ -14,19 +14,19 @@ cho toàn bộ nghiệp vụ, bám sát các controller hiện có.
 
 **Bản đồ API → vai trò người dùng:**
 
-| Nhóm API | Vai trò | Chức năng chính |
-|---|---|---|
-| `/api/auth/*`, `/api/users/me` | Công khai / mọi user | Đăng ký, đăng nhập, phiên |
-| `/api/events`, `/api/events/{id}` | Công khai | Duyệt & xem chi tiết sự kiện |
-| `/api/orders/*`, `/api/tickets/*` | CUSTOMER | Đặt vé, thanh toán, hủy, vé của tôi, PDF vé |
-| `/api/organizer/events/*`, `/api/ticket-types/{id}`, `/api/organizer/checkin` | ORGANIZER | Quản lý sự kiện, hạng vé, check-in, báo cáo |
-| `/api/admin/categories/*`, `/api/admin/venues/*`, `/api/admin/reports/revenue` | ADMIN | Danh mục, địa điểm, báo cáo doanh thu |
+| Nhóm API                                                                       | Vai trò              | Chức năng chính                             |
+| ------------------------------------------------------------------------------ | -------------------- | ------------------------------------------- |
+| `/api/auth/*`, `/api/users/me`                                                 | Công khai / mọi user | Đăng ký, đăng nhập, phiên                   |
+| `/api/events`, `/api/events/{id}`                                              | Công khai            | Duyệt & xem chi tiết sự kiện                |
+| `/api/orders/*`, `/api/tickets/*`                                              | CUSTOMER             | Đặt vé, thanh toán, hủy, vé của tôi, PDF vé |
+| `/api/organizer/events/*`, `/api/ticket-types/{id}`, `/api/organizer/checkin`  | ORGANIZER            | Quản lý sự kiện, hạng vé, check-in, báo cáo |
+| `/api/admin/categories/*`, `/api/admin/venues/*`, `/api/admin/reports/revenue` | ADMIN                | Danh mục, địa điểm, báo cáo doanh thu       |
 
 ---
 
 ## Phase 0 — (Backend) Endpoint công khai đọc danh mục & địa điểm
 
-> **Quyết định đã chốt:** xử lý theo *hướng 1* — bổ sung 2 endpoint read-only không yêu cầu quyền.
+> **Quyết định đã chốt:** xử lý theo _hướng 1_ — bổ sung 2 endpoint read-only không yêu cầu quyền.
 > Đây là điều kiện tiên quyết cho bộ lọc sự kiện công khai (Phase 2) và form tạo sự kiện của
 > organizer (Phase 4). Là thay đổi backend nằm ngoài controller hiện có, đã được xác nhận.
 
@@ -176,6 +176,21 @@ Phục vụ `/api/admin/*`. adminGuard + `admin-layout` sẵn có.
    aria-label (đã có nền tảng trong layout).
 4. **Điều hướng theo vai trò**: menu, trang chủ và redirect sau đăng nhập tùy biến theo vai trò.
 5. **Tiêu đề trang & routing**: đặt `title` cho mọi route; `returnUrl` sau đăng nhập.
+
+**Trạng thái Phase 7: đã triển khai và xác minh frontend (23/10/2026).**
+
+- Dùng Angular Material snackbar qua `FeedbackService`; giữ lỗi/validation tại form để không mất
+  thông tin khi đóng snackbar. Chỉ báo thành công thao tác ghi sau phản hồi backend xác nhận.
+- Spinner dùng chung cho danh sách/chi tiết, giới hạn chờ API 30 giây, không tự replay thao tác ghi.
+- Hoàn thiện skip-link không đổi route, focus khi chuyển trang/mở và đóng vùng xác nhận,
+  `aria-current`, bảng cuộn bằng bàn phím và menu mobile với tên người dùng dài; giữ palette xám.
+- Trang chủ, login/register và trang lỗi dẫn đúng vai trò; giữ query trong `returnUrl` hợp lệ,
+  từ chối đích ngoài whitelist; có thông báo và nút tải lại khi lazy route bị lỗi.
+- Production build, TypeScript và `git diff --check` đạt. Chrome headless với API giả lập:
+  UX Phase 7 (78 requests), hồi quy Phase 3–6 (63 + 83 + 27 + 76 requests) đều đạt;
+  kiểm tra mobile 320/390px, timeout, keyboard focus/scroll, lỗi phiên và không replay POST.
+- **Giới hạn:** chưa xác minh tích hợp backend thật; smoke script ở thư mục tạm, không ghi dữ liệu
+  backend thật. Không thêm dependency, không thay đổi backend trong Phase 7.
 
 ---
 

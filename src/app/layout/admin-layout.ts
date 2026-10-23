@@ -3,12 +3,14 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { MatButton } from '@angular/material/button';
 import { SessionService } from '../core/auth/session.service';
 import { Icon } from '../shared/icon';
+import { SkipLink } from '../shared/skip-link';
+import { FeedbackService } from '../shared/feedback.service';
 
 @Component({
   selector: 'app-admin-layout',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, MatButton, Icon],
+  imports: [SkipLink, RouterLink, RouterLinkActive, RouterOutlet, MatButton, Icon],
   template: `
-    <a class="skip-link" href="#admin-content">Đến nội dung quản trị</a>
+    <a appSkipLink class="skip-link" href="#admin-content">Đến nội dung quản trị</a>
     <div class="admin-shell">
       <aside class="admin-sidebar">
         <a class="brand" routerLink="/"
@@ -19,17 +21,18 @@ import { Icon } from '../shared/icon';
           <a
             routerLink="/admin"
             routerLinkActive="active"
+            ariaCurrentWhenActive="page"
             [routerLinkActiveOptions]="{ exact: true }"
           >
             <app-icon name="home" /> Tổng quan
           </a>
-          <a routerLink="/admin/categories" routerLinkActive="active"
+          <a routerLink="/admin/categories" routerLinkActive="active" ariaCurrentWhenActive="page"
             ><app-icon name="grid" /> Danh mục</a
           >
-          <a routerLink="/admin/venues" routerLinkActive="active"
+          <a routerLink="/admin/venues" routerLinkActive="active" ariaCurrentWhenActive="page"
             ><app-icon name="compass" /> Địa điểm</a
           >
-          <a routerLink="/admin/reports" routerLinkActive="active"
+          <a routerLink="/admin/reports" routerLinkActive="active" ariaCurrentWhenActive="page"
             ><app-icon name="list" /> Báo cáo doanh thu</a
           >
           <a routerLink="/"><app-icon name="left" /> Về trang chủ</a>
@@ -64,6 +67,7 @@ export class AdminLayout {
   protected readonly session = inject(SessionService);
   protected readonly signingOut = signal(false);
   private readonly router = inject(Router);
+  private readonly feedback = inject(FeedbackService);
 
   constructor() {
     effect(() => {
@@ -78,9 +82,15 @@ export class AdminLayout {
     this.signingOut.set(true);
     try {
       await this.session.logout();
+      this.feedback.success('Đã đăng xuất.');
+    } catch {
+      this.feedback.error(
+        'Đã xóa phiên trên thiết bị nhưng chưa xác nhận đăng xuất trên máy chủ. Kiểm tra kết nối trước khi tiếp tục.',
+        true,
+      );
     } finally {
-      this.signingOut.set(false);
       await this.router.navigate(['/login']);
+      this.signingOut.set(false);
     }
   }
 }

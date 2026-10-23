@@ -11,16 +11,33 @@ import { Icon } from './icon';
         <button mat-stroked-button type="button" [disabled]="page() <= 0" (click)="go(page() - 1)">
           <app-icon name="left" /> Trước
         </button>
-        <span class="page-info">Trang {{ page() + 1 }} / {{ totalPages() }}</span>
-        <button mat-stroked-button type="button" [disabled]="page() >= totalPages() - 1" (click)="go(page() + 1)">
+        <span class="page-info" aria-live="polite" aria-atomic="true"
+          >Trang {{ page() + 1 }} / {{ totalPages() }}</span
+        >
+        <button
+          mat-stroked-button
+          type="button"
+          [disabled]="page() >= totalPages() - 1"
+          (click)="go(page() + 1)"
+        >
           Sau <app-icon name="right" />
         </button>
       </nav>
     }
   `,
   styles: `
-    .paginator { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-top: 1.5rem; }
-    .page-info { font-size: .9rem; color: #5a6168; }
+    .paginator {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+    .page-info {
+      font-size: 0.9rem;
+      color: var(--app-muted);
+    }
   `,
 })
 export class Paginator {
