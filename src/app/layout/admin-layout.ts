@@ -11,28 +11,53 @@ import { Icon } from '../shared/icon';
     <a class="skip-link" href="#admin-content">Đến nội dung quản trị</a>
     <div class="admin-shell">
       <aside class="admin-sidebar">
-        <a class="brand" routerLink="/"><span class="brand-icon"><app-icon name="grid" /></span> Quản trị</a>
+        <a class="brand" routerLink="/"
+          ><span class="brand-icon"><app-icon name="grid" /></span> Quản trị</a
+        >
         <p class="eyebrow">KHU VỰC HỆ THỐNG</p>
         <nav aria-label="Điều hướng quản trị">
-          <a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+          <a
+            routerLink="/admin"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
             <app-icon name="home" /> Tổng quan
           </a>
+          <a routerLink="/admin/categories" routerLinkActive="active"
+            ><app-icon name="grid" /> Danh mục</a
+          >
+          <a routerLink="/admin/venues" routerLinkActive="active"
+            ><app-icon name="compass" /> Địa điểm</a
+          >
+          <a routerLink="/admin/reports" routerLinkActive="active"
+            ><app-icon name="list" /> Báo cáo doanh thu</a
+          >
           <a routerLink="/"><app-icon name="left" /> Về trang chủ</a>
         </nav>
         <p class="sidebar-note">Quản lý và thiết lập chức năng nghiệp vụ của ứng dụng.</p>
       </aside>
       <div class="admin-main">
         <header class="admin-header">
-          <div><span class="eyebrow">TÀI KHOẢN ADMIN</span><strong>{{ session.user()?.fullName }}</strong></div>
+          <div>
+            <span class="eyebrow">TÀI KHOẢN ADMIN</span
+            ><strong>{{ session.user()?.fullName }}</strong>
+          </div>
           <button mat-stroked-button type="button" [disabled]="signingOut()" (click)="logout()">
             <app-icon name="logout" /> {{ signingOut() ? 'Đang đăng xuất…' : 'Đăng xuất' }}
           </button>
         </header>
         <main id="admin-content" class="admin-content" tabindex="-1">
-          @if (session.isAdmin()) { <router-outlet /> }
+          @if (session.isAdmin()) {
+            <router-outlet />
+          }
         </main>
       </div>
     </div>
+  `,
+  styles: `
+    .admin-main {
+      min-width: 0;
+    }
   `,
 })
 export class AdminLayout {
@@ -43,7 +68,7 @@ export class AdminLayout {
   constructor() {
     effect(() => {
       if (!this.session.loading() && !this.session.isAdmin() && !this.signingOut()) {
-        void this.router.navigate(['/login']);
+        void this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
       }
     });
   }

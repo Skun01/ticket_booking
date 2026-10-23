@@ -46,7 +46,10 @@ export class CatalogApi {
   private readonly http = inject(HttpClient);
   private readonly base = inject(API_BASE_URL).replace(/\/$/, '');
 
-  listEvents(filter: EventFilter = {}, page: PageQuery = {}): Observable<PageResponse<EventSummary>> {
+  listEvents(
+    filter: EventFilter = {},
+    page: PageQuery = {},
+  ): Observable<PageResponse<EventSummary>> {
     return this.http.get<PageResponse<EventSummary>>(`${this.base}/events`, {
       params: toParams({ ...filter, page: page.page, size: page.size }),
     });
@@ -148,7 +151,10 @@ export class OrganizerApi {
   }
 
   createTicketType(eventId: number, request: TicketTypeRequest): Observable<TicketType> {
-    return this.http.post<TicketType>(`${this.base}/organizer/events/${eventId}/ticket-types`, request);
+    return this.http.post<TicketType>(
+      `${this.base}/organizer/events/${eventId}/ticket-types`,
+      request,
+    );
   }
 
   updateTicketType(id: number, request: TicketTypeRequest): Observable<TicketType> {
@@ -164,7 +170,9 @@ export class OrganizerApi {
   }
 
   reportPdf(eventId: number): Observable<Blob> {
-    return this.http.get(`${this.base}/organizer/events/${eventId}/report/pdf`, { responseType: 'blob' });
+    return this.http.get(`${this.base}/organizer/events/${eventId}/report/pdf`, {
+      responseType: 'blob',
+    });
   }
 }
 
@@ -178,6 +186,10 @@ export class AdminApi {
     return this.http.get<PageResponse<Category>>(`${this.base}/admin/categories`, {
       params: toParams({ page: page.page, size: page.size }),
     });
+  }
+
+  getCategory(id: number): Observable<Category> {
+    return this.http.get<Category>(`${this.base}/admin/categories/${id}`);
   }
 
   createCategory(request: CategoryRequest): Observable<Category> {
@@ -196,6 +208,10 @@ export class AdminApi {
     return this.http.get<PageResponse<Venue>>(`${this.base}/admin/venues`, {
       params: toParams({ page: page.page, size: page.size }),
     });
+  }
+
+  getVenue(id: number): Observable<Venue> {
+    return this.http.get<Venue>(`${this.base}/admin/venues/${id}`);
   }
 
   createVenue(request: VenueRequest): Observable<Venue> {

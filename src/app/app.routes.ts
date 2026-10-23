@@ -85,6 +85,26 @@ export const routes: Routes = [
         title: 'Quản trị · Fullstack Starter',
         loadComponent: () => import('./features/admin/admin-home').then((m) => m.AdminHome),
       },
+      {
+        path: 'categories',
+        title: 'Quản lý danh mục · Fullstack Starter',
+        data: { catalog: 'categories' },
+        loadComponent: () =>
+          import('./features/admin/admin-catalog-page').then((m) => m.AdminCatalogPage),
+      },
+      {
+        path: 'venues',
+        title: 'Quản lý địa điểm · Fullstack Starter',
+        data: { catalog: 'venues' },
+        loadComponent: () =>
+          import('./features/admin/admin-catalog-page').then((m) => m.AdminCatalogPage),
+      },
+      {
+        path: 'reports',
+        title: 'Báo cáo doanh thu · Fullstack Starter',
+        loadComponent: () =>
+          import('./features/admin/admin-reports-page').then((m) => m.AdminReportsPage),
+      },
     ],
   },
   {

@@ -65,6 +65,13 @@ const codeMessages: Record<string, string> = {
   QUANTITY_BELOW_SOLD: 'Tổng vé không được thấp hơn số đã bán hoặc đang giữ chỗ.',
   CATEGORY_NOT_FOUND: 'Danh mục không còn tồn tại. Vui lòng tải lại form.',
   VENUE_NOT_FOUND: 'Địa điểm không còn tồn tại. Vui lòng tải lại form.',
+  CATEGORY_SLUG_EXISTS: 'Slug danh mục đã tồn tại. Vui lòng chọn slug khác.',
+  CATEGORY_IN_USE: 'Không thể xóa danh mục đang được sự kiện sử dụng.',
+  VENUE_IN_USE: 'Không thể xóa địa điểm đang được sự kiện sử dụng.',
+  VENUE_CAPACITY_IN_USE:
+    'Không thể đổi sức chứa địa điểm đã được sự kiện sử dụng. Giữ nguyên sức chứa để cập nhật thông tin khác.',
+  INVALID_REPORT_RANGE:
+    'Khoảng báo cáo không hợp lệ. Thời điểm bắt đầu phải trước thời điểm kết thúc.',
 };
 
 export function apiError(

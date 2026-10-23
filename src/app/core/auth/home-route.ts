@@ -17,6 +17,12 @@ export function postLoginRoute(user: CurrentUser, returnUrl: string | null): str
     /^\/organizer(?:\/checkin|\/events\/(?:new|[1-9]\d*(?:\/(?:edit|report))?))?$/.test(returnUrl)
   )
     return returnUrl;
+  if (
+    user.role === 'ADMIN' &&
+    returnUrl &&
+    /^\/admin(?:\/(?:categories|venues|reports))?$/.test(returnUrl)
+  )
+    return returnUrl;
   return homeRouteFor(user);
 }
 
