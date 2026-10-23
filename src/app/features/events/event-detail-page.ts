@@ -59,9 +59,7 @@ import { MoneyPipe } from '../../shared/money.pipe';
                 <div>
                   <strong>{{ tt.name }}</strong>
                   <p class="ticket-sub">{{ tt.price | money }}</p>
-                  <p class="ticket-sub muted">
-                    Còn {{ tt.availableQuantity }} vé · tối đa {{ tt.maxPerOrder }}/đơn
-                  </p>
+                  <p class="ticket-sub muted">Tối đa {{ tt.maxPerOrder }} vé/đơn</p>
                   @if (tt.saleStart) {
                     <p class="ticket-sub muted">Mở bán: {{ tt.saleStart | dateTime }}</p>
                   }
