@@ -186,9 +186,11 @@ import { uncertainWrite } from './organizer-utils';
       font-variant-numeric: tabular-nums;
     }
     .result-panel {
-      border-top: 4px solid var(--app-ink);
+      border-top: 4px solid var(--app-success);
+      background: linear-gradient(var(--app-success-soft), var(--app-panel) 180px);
     }
     .result-panel h2 {
+      color: var(--app-success);
       margin-bottom: 12px;
     }
     dl {

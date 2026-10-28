@@ -20,7 +20,7 @@ const labels: Record<string, string> = {
 
 // Map trạng thái → tông màu (class).
 const tones: Record<string, string> = {
-  DRAFT: 'neutral',
+  DRAFT: 'info',
   PUBLISHED: 'success',
   CANCELLED: 'danger',
   ENDED: 'neutral',
@@ -40,10 +40,11 @@ const tones: Record<string, string> = {
       border-radius: 999px; font-size: .8rem; font-weight: 600; line-height: 1.6;
       border: 1px solid transparent;
     }
-    .success { background: #e6f4ea; color: #1e7e34; border-color: #bfe3c9; }
-    .warning { background: #fff4e5; color: #b26a00; border-color: #ffd9a8; }
-    .danger  { background: #fdecea; color: #c0392b; border-color: #f5c6c0; }
-    .neutral { background: #eef0f2; color: #5a6168; border-color: #d9dde1; }
+    .success { background: var(--app-success-soft); color: var(--app-success); border-color: var(--app-success-line); }
+    .warning { background: var(--app-warning-soft); color: var(--app-warning); border-color: var(--app-warning-line); }
+    .danger  { background: var(--app-danger-soft); color: var(--app-danger); border-color: var(--app-danger-line); }
+    .info    { background: var(--app-info-soft); color: var(--app-info); border-color: var(--app-info-line); }
+    .neutral { background: var(--app-soft); color: var(--app-muted); border-color: var(--app-line); }
   `,
 })
 export class StatusBadge {

@@ -1,7 +1,7 @@
 @use '@angular/material' as mat;
 @use 'sass:map';
 
-// Neutral M3 tonal palette: keep Angular Material controls in the same grayscale as the app.
+// Keep Material controls neutral; use the shared accent tokens for highlighted content.
 $tones: (
   0: #000000,
   4: #101010,
@@ -61,7 +61,22 @@ html {
   --app-ink: #1d1d1d;
   --app-muted: #515151;
   --app-line: #d2d2d2;
-  --app-accent: #1d1d1d;
+  --app-accent: #0f766e;
+  --app-accent-strong: #115e59;
+  --app-accent-soft: #edf9f6;
+  --app-accent-line: #b7e4db;
+  --app-info: #1e40af;
+  --app-info-soft: #eff6ff;
+  --app-info-line: #bfdbfe;
+  --app-success: #166534;
+  --app-success-soft: #f0fdf4;
+  --app-success-line: #bbf7d0;
+  --app-warning: #92400e;
+  --app-warning-soft: #fffbeb;
+  --app-warning-line: #fde68a;
+  --app-danger: #b91c1c;
+  --app-danger-soft: #fef2f2;
+  --app-danger-line: #fecaca;
   --app-soft: #ebebeb;
   --app-inverse: #fdfdfd;
   font-family: 'Arial', 'Helvetica Neue', sans-serif;
@@ -92,7 +107,7 @@ a:hover {
 a:focus-visible,
 button:focus-visible,
 input:focus-visible {
-  outline: 2px solid var(--app-ink);
+  outline: 2px solid var(--app-accent);
   outline-offset: 3px;
 }
 h1,
@@ -131,8 +146,24 @@ h3 {
   font-size: 0.72rem;
   font-weight: 750;
   letter-spacing: 0.14em;
-  color: var(--app-muted);
+  color: var(--app-accent-strong);
   margin-bottom: 0.9rem;
+}
+.event-cat {
+  display: inline-flex;
+  align-self: flex-start;
+  max-width: 100%;
+  padding: 0.2rem 0.65rem;
+  margin-bottom: 0.25rem;
+  border: 1px solid var(--app-accent-line);
+  border-radius: 999px;
+  background: var(--app-accent-soft);
+  color: var(--app-accent-strong);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
 }
 .brand {
   display: inline-flex;
@@ -149,7 +180,7 @@ h3 {
   display: inline-flex;
   padding: 0.65rem;
   color: var(--app-inverse);
-  background: var(--app-ink);
+  background: var(--app-accent);
   border-radius: 0.25rem;
 }
 .site-header {
@@ -174,7 +205,7 @@ h3 {
   color: var(--app-muted);
 }
 .site-header nav a.active {
-  color: var(--app-ink);
+  color: var(--app-accent);
   font-weight: 750;
   text-decoration: underline;
   text-underline-offset: 0.55rem;
@@ -199,17 +230,23 @@ h3 {
   min-height: calc(100dvh - 185px);
 }
 .intro-section {
-  padding: 76px 0 70px;
-  max-width: 850px;
+  margin: 32px 0 48px;
+  padding: 56px 40px;
+  border: 1px solid var(--app-accent-line);
+  border-left: 4px solid var(--app-accent);
+  border-radius: 0.65rem;
+  background: linear-gradient(115deg, var(--app-accent-soft), var(--app-info-soft));
 }
 .intro-section h1 {
   max-width: 800px;
 }
 .intro-section .eyebrow {
   display: inline-block;
-  padding: 0.3rem 0.6rem;
-  border: 1px solid var(--app-ink);
-  color: var(--app-ink);
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--app-accent-line);
+  border-radius: 999px;
+  background: var(--app-panel);
+  color: var(--app-accent-strong);
 }
 .notice {
   display: flex;
@@ -233,7 +270,7 @@ h3 {
   gap: 1rem;
   margin-bottom: 1.25rem;
   padding-top: 1.5rem;
-  border-top: 2px solid var(--app-ink);
+  border-top: 2px solid var(--app-accent-line);
 }
 .section-heading h2 {
   margin: 0;
@@ -335,7 +372,7 @@ h3 {
   padding: 32px;
   background: var(--app-panel);
   border: 1px solid var(--app-line);
-  border-top: 4px solid var(--app-ink);
+  border-top: 4px solid var(--app-accent);
   border-radius: 0.4rem;
 }
 .login-card h1 {
@@ -347,21 +384,27 @@ h3 {
   border-radius: 0.25rem;
   font-size: 0.9rem;
   margin: 1rem 0;
-  background: var(--app-soft);
-  color: var(--app-ink);
-  border-left: 4px solid var(--app-ink);
+  background: var(--app-info-soft);
+  color: var(--app-info);
+  border-left: 4px solid var(--app-info);
 }
 .form-notice.warning {
+  background: var(--app-warning-soft);
+  color: var(--app-warning);
+  border-left-color: var(--app-warning);
   border-left-style: dashed;
 }
 .form-notice.error {
-  border: 2px solid var(--app-ink);
-  border-left-width: 6px;
+  background: var(--app-danger-soft);
+  color: var(--app-danger);
+  border: 2px solid var(--app-danger-line);
+  border-left: 6px solid var(--app-danger);
   font-weight: 600;
 }
 .form-notice.success {
-  background: var(--app-ink);
-  color: var(--app-inverse);
+  background: var(--app-success-soft);
+  color: var(--app-success);
+  border-left-color: var(--app-success);
 }
 .form-field {
   display: block;
@@ -524,7 +567,7 @@ button app-icon {
   --mdc-outlined-text-field-container-shape: 4px;
 }
 .mat-mdc-form-field-error {
-  color: var(--app-ink);
+  color: var(--app-danger);
   font-weight: 700;
 }
 
@@ -567,7 +610,8 @@ button app-icon {
     padding: 0 16px 40px;
   }
   .intro-section {
-    padding: 48px 0 40px;
+    margin: 24px 0 32px;
+    padding: 32px 24px;
   }
   .feature-grid {
     grid-template-columns: 1fr;
@@ -614,7 +658,7 @@ button app-icon {
 }
 /* Shared UX: visible keyboard focus, long content and mobile navigation. */
 :where(textarea, select, [tabindex]):focus-visible {
-  outline: 2px solid var(--app-ink);
+  outline: 2px solid var(--app-accent);
   outline-offset: 3px;
 }
 h1,
@@ -654,7 +698,7 @@ main {
   min-width: 0;
 }
 :where(main, [role='main']) h1:focus-visible {
-  outline: 2px solid var(--app-ink);
+  outline: 2px solid var(--app-accent);
   outline-offset: 4px;
 }
 .table-scroll:focus-visible {
@@ -672,7 +716,7 @@ main {
   overflow-wrap: anywhere;
 }
 .app-snackbar-error .mat-mdc-snackbar-surface {
-  border-left: 4px solid var(--app-line);
+  border-left: 4px solid var(--app-danger-line);
 }
 @media (max-width: 360px) {
   .admin-header {

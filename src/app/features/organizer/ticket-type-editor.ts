@@ -9,7 +9,7 @@ import { finalize, timeout } from 'rxjs';
 import { OrganizerApi } from '../../core/api/catalog.api';
 import { FeedbackService } from '../../shared/feedback.service';
 import { EventItem, TicketType, TicketTypeRequest } from '../../core/api/models';
-import { uncertainWrite, vietnamDateInput, vietnamInstant } from './organizer-utils';
+import { uncertainWrite } from './organizer-utils';
 
 @Component({
   selector: 'app-ticket-type-editor',
@@ -18,8 +18,7 @@ import { uncertainWrite, vietnamDateInput, vietnamInstant } from './organizer-ut
     <section class="panel" appFocusOnShow aria-labelledby="ticket-editor-title">
       <h2 id="ticket-editor-title">{{ ticketType() ? 'Sửa hạng vé' : 'Thêm hạng vé' }}</h2>
       <p class="muted">
-        Tổng số vé mọi hạng không được vượt {{ event().venue.capacity }} chỗ của địa điểm. Nhập giờ
-        bán theo giờ Việt Nam (UTC+7).
+        Tổng số vé mọi hạng không được vượt {{ event().venue.capacity }} chỗ của địa điểm.
       </p>
       <form [formGroup]="form" (ngSubmit)="save()" novalidate>
         <mat-form-field appearance="outline" class="wide">
@@ -64,14 +63,6 @@ import { uncertainWrite, vietnamDateInput, vietnamInstant } from './organizer-ut
             step="1"
             required
           />
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Mở bán (không bắt buộc)</mat-label>
-          <input matInput type="datetime-local" step="1" formControlName="saleStart" />
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Ngừng bán (không bắt buộc)</mat-label>
-          <input matInput type="datetime-local" step="1" formControlName="saleEnd" />
         </mat-form-field>
         @if (error()) {
           <p class="form-notice error wide" role="alert">{{ error() }}</p>
@@ -146,8 +137,6 @@ export class TicketTypeEditor {
     price: ['0'],
     totalQuantity: [null as number | null],
     maxPerOrder: [1 as number | null],
-    saleStart: [''],
-    saleEnd: [''],
   });
 
   constructor() {
@@ -161,8 +150,6 @@ export class TicketTypeEditor {
         price: String(tt?.price ?? 0),
         totalQuantity: tt?.totalQuantity ?? null,
         maxPerOrder: tt?.maxPerOrder ?? 1,
-        saleStart: tt?.saleStart ? vietnamDateInput(tt.saleStart) : '',
-        saleEnd: tt?.saleEnd ? vietnamDateInput(tt.saleEnd) : '',
       });
     });
   }
@@ -210,27 +197,11 @@ export class TicketTypeEditor {
       this.error.set('Tổng số vé của các hạng vượt sức chứa địa điểm.');
       return;
     }
-    const start = value.saleStart ? vietnamInstant(value.saleStart) : null;
-    const end = value.saleEnd ? vietnamInstant(value.saleEnd) : null;
-    if (
-      (value.saleStart && !start) ||
-      (value.saleEnd && !end) ||
-      (start && Date.parse(start) >= Date.parse(ev.startTime)) ||
-      (end && Date.parse(end) > Date.parse(ev.startTime)) ||
-      (start && end && Date.parse(end) <= Date.parse(start))
-    ) {
-      this.error.set(
-        'Giờ mở bán phải trước sự kiện; giờ ngừng bán không sau giờ bắt đầu sự kiện và phải sau giờ mở bán.',
-      );
-      return;
-    }
     const request: TicketTypeRequest = {
       name: value.name.trim(),
       price: Number(value.price),
       totalQuantity: total,
       maxPerOrder: max,
-      saleStart: start,
-      saleEnd: end,
     };
     this.busy.set(true);
     this.busyChange.emit(true);

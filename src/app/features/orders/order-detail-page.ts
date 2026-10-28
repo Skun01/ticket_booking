@@ -132,7 +132,7 @@ import { StatusBadge } from '../../shared/status-badge';
             </button>
           </div>
           @if (confirmCancel()) {
-            <div class="form-notice" role="group" appFocusOnShow aria-label="Xác nhận hủy đơn">
+            <div class="form-notice warning" role="group" appFocusOnShow aria-label="Xác nhận hủy đơn">
               <p>Hủy đơn này và trả lại số vé đang giữ chỗ?</p>
               <div class="form-actions">
                 <button
@@ -157,7 +157,7 @@ import { StatusBadge } from '../../shared/status-badge';
           }
         </section>
       } @else if (order.status === 'PAID') {
-        <section class="panel">
+        <section class="panel payment-success">
           <h2>Thanh toán thành công</h2>
           <p>Vé điện tử của đơn đã được phát hành. Bạn có thể tải từng vé PDF có mã QR.</p>
           <a mat-flat-button routerLink="/tickets">Vé của tôi</a>
@@ -203,8 +203,20 @@ import { StatusBadge } from '../../shared/status-badge';
       font-size: 1.1rem;
     }
     .countdown {
+      padding: 12px 16px;
+      border: 1px solid var(--app-warning-line);
+      border-radius: 0.4rem;
+      background: var(--app-warning-soft);
+      color: var(--app-warning);
       font-size: 1.1rem;
       font-variant-numeric: tabular-nums;
+    }
+    .payment-success {
+      border-top: 4px solid var(--app-success);
+      background: linear-gradient(var(--app-success-soft), var(--app-panel) 180px);
+    }
+    .payment-success h2 {
+      color: var(--app-success);
     }
     .items {
       border-top: 1px solid var(--app-line);

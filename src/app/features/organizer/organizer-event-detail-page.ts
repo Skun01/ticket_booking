@@ -53,6 +53,10 @@ import { TicketTypeEditor } from './ticket-type-editor';
         <app-status-badge [status]="ev.status" />
         <h2>{{ ev.title }}</h2>
         <p>{{ ev.startTime | dateTime }} đến {{ ev.endTime | dateTime }} (giờ Việt Nam)</p>
+        <p>
+          Mở bán: {{ ev.salesStartTime | dateTime }}. Tự động ngừng bán khi sự kiện bắt đầu lúc
+          {{ ev.startTime | dateTime }}.
+        </p>
         <p>{{ ev.category.name }} · {{ ev.venue.name }}</p>
         <p class="muted">
           {{ ev.venue.address }}, {{ ev.venue.city }}. Sức chứa: {{ ev.venue.capacity }} chỗ.
@@ -194,12 +198,6 @@ import { TicketTypeEditor } from './ticket-type-editor';
               </p>
               <p class="muted">
                 Đã bán/giữ chỗ: {{ tt.soldQuantity }}. Còn: {{ tt.availableQuantity }}.
-              </p>
-              <p class="muted">
-                Mở bán: {{ tt.saleStart ? (tt.saleStart | dateTime) : 'Không giới hạn' }}
-              </p>
-              <p class="muted">
-                Ngừng bán: {{ tt.saleEnd ? (tt.saleEnd | dateTime) : 'Theo giờ bắt đầu sự kiện' }}
               </p>
             </div>
             @if (ev.status === 'DRAFT') {

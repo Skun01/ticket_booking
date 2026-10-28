@@ -3,7 +3,8 @@ import { FeedbackService } from '../../shared/feedback.service';
 import { vietnamInstant } from '../../shared/vietnam-time';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { debounceTime, distinctUntilChanged, EMPTY, expand, reduce, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, EMPTY, expand, interval, reduce, Subscription } from 'rxjs';
+import { EventSalesStatus } from './event-sales-status';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MatButton, MatIconButton } from '@angular/material/button';
@@ -42,6 +43,7 @@ interface ActiveChip {
     Icon,
     PageHeader,
     Paginator,
+    EventSalesStatus,
   ],
   template: `
     <app-page-header
@@ -194,7 +196,11 @@ interface ActiveChip {
             <div class="event-body">
               <span class="event-cat">{{ ev.category.name }}</span>
               <h3>{{ ev.title }}</h3>
-              <p class="event-meta"><app-icon name="calendar" /> {{ ev.startTime | dateTime }}</p>
+              <app-event-sales-status [event]="ev" [now]="now()" />
+              <dl class="card-dates">
+                <div><dt>Diễn ra</dt><dd>{{ ev.startTime | dateTime }}</dd></div>
+                <div><dt>Mở bán</dt><dd>{{ ev.salesStartTime | dateTime }}</dd></div>
+              </dl>
               <p class="event-meta">
                 <app-icon name="compass" /> {{ ev.venue.name }}, {{ ev.venue.city }}
               </p>
@@ -233,8 +239,8 @@ interface ActiveChip {
       transition: border-color 0.15s ease;
     }
     .search-field:focus-within {
-      border-color: var(--app-ink);
-      box-shadow: inset 0 0 0 1px var(--app-ink);
+      border-color: var(--app-accent);
+      box-shadow: inset 0 0 0 1px var(--app-accent);
     }
     .search-field app-icon {
       color: var(--app-muted);
@@ -293,9 +299,9 @@ interface ActiveChip {
       border-color: var(--app-ink);
     }
     .filter-toggle.is-active {
-      background: var(--app-ink);
-      color: var(--app-inverse);
-      border-color: var(--app-ink);
+      background: var(--app-accent-soft);
+      color: var(--app-accent-strong);
+      border-color: var(--app-accent);
     }
     .filter-toggle app-icon {
       font-size: 1.05rem;
@@ -308,14 +314,10 @@ interface ActiveChip {
       height: 1.35rem;
       padding: 0 0.35rem;
       border-radius: 1rem;
-      background: var(--app-ink);
+      background: var(--app-accent);
       color: var(--app-inverse);
       font-size: 0.75rem;
       font-weight: 700;
-    }
-    .filter-toggle.is-active .filter-count {
-      background: var(--app-inverse);
-      color: var(--app-ink);
     }
 
     /* ---- Advanced filters ---- */
@@ -323,7 +325,7 @@ interface ActiveChip {
       margin-top: 12px;
       padding: 18px;
       border: 1px solid var(--app-line);
-      border-top: 2px solid var(--app-ink);
+      border-top: 2px solid var(--app-accent);
       border-radius: 0.3rem;
       background: var(--app-panel);
       animation: filter-open 0.18s ease;
@@ -375,10 +377,10 @@ interface ActiveChip {
       align-items: center;
       gap: 0.4rem;
       padding: 0.32rem 0.7rem;
-      border: 1px solid var(--app-ink);
+      border: 1px solid var(--app-accent-line);
       border-radius: 1.2rem;
-      background: var(--app-panel);
-      color: var(--app-ink);
+      background: var(--app-accent-soft);
+      color: var(--app-accent-strong);
       font-size: 0.82rem;
       cursor: pointer;
       transition:
@@ -386,8 +388,9 @@ interface ActiveChip {
         color 0.15s ease;
     }
     .chip:hover {
-      background: var(--app-ink);
+      background: var(--app-accent);
       color: var(--app-inverse);
+      border-color: var(--app-accent);
     }
     .chip-x {
       font-size: 1rem;
@@ -395,7 +398,8 @@ interface ActiveChip {
     }
     .chip-reset {
       border-style: dashed;
-      border-color: var(--app-muted);
+      border-color: var(--app-line);
+      background: var(--app-panel);
       color: var(--app-muted);
     }
     .chip-reset:hover {
@@ -441,18 +445,18 @@ interface ActiveChip {
         transform 0.15s ease;
     }
     .event-card:hover {
-      border-color: var(--app-ink);
+      border-color: var(--app-accent);
       transform: translateY(-2px);
     }
     .event-banner {
       aspect-ratio: 16 / 9;
-      background: var(--app-soft);
+      background: linear-gradient(135deg, var(--app-accent-soft), var(--app-info-soft));
       background-size: cover;
       background-position: center;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--app-muted);
+      color: var(--app-accent);
       font-size: 2rem;
     }
     .event-body {
@@ -462,15 +466,26 @@ interface ActiveChip {
       gap: 0.35rem;
       overflow-wrap: anywhere;
     }
-    .event-cat {
-      font-size: 0.72rem;
-      font-weight: 750;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--app-muted);
-    }
     .event-body h3 {
       margin: 0.1rem 0 0.4rem;
+    }
+    .card-dates {
+      margin: 10px 0;
+      font-size: 0.85rem;
+    }
+    .card-dates > div {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2px 10px;
+      margin-top: 5px;
+    }
+    .card-dates dt {
+      color: var(--app-muted);
+      min-width: 56px;
+    }
+    .card-dates dd {
+      margin: 0;
+      font-weight: 700;
     }
     .event-meta {
       display: flex;
@@ -519,6 +534,7 @@ export class EventsPage {
   private listRequest?: Subscription;
   private appliedFilter: EventFilter = {};
 
+  protected readonly now = signal(Date.now());
   protected readonly categories = signal<Category[]>([]);
   protected readonly categoryError = signal('');
   protected readonly filterError = signal('');
@@ -586,6 +602,9 @@ export class EventsPage {
   });
 
   constructor() {
+    interval(1000)
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.now.set(Date.now()));
     this.api
       .listCategories({ size: 100 })
       .pipe(

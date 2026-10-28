@@ -14,6 +14,8 @@ import { DateTimePipe } from '../../shared/date-time.pipe';
 import { Icon } from '../../shared/icon';
 import { MoneyPipe } from '../../shared/money.pipe';
 import { PageHeader } from '../../shared/page-header';
+  import { ticketUnavailableReason } from './ticket-availability';
+  import { EventSalesStatus } from './event-sales-status';
 
 @Component({
   selector: 'app-booking-page',
@@ -26,6 +28,7 @@ import { PageHeader } from '../../shared/page-header';
     Icon,
     MoneyPipe,
     PageHeader,
+    EventSalesStatus,
   ],
   template: `
     <app-page-header title="Đặt vé" subtitle="Chọn một hạng vé và số lượng cho đơn của bạn." />
@@ -39,7 +42,13 @@ import { PageHeader } from '../../shared/page-header';
       <div class="booking-grid">
         <section class="panel">
           <h2>{{ ev.title }}</h2>
-          <p class="muted">{{ ev.startTime | dateTime }}</p>
+          <app-event-sales-status [event]="ev" [now]="now()" />
+          <dl class="booking-dates">
+            <div><dt>Diễn ra</dt><dd>{{ ev.startTime | dateTime }} đến {{ ev.endTime | dateTime }}</dd></div>
+            <div><dt>Mở bán</dt><dd>{{ ev.salesStartTime | dateTime }}</dd></div>
+            <div><dt>Đóng bán</dt><dd>{{ ev.startTime | dateTime }} (khi sự kiện bắt đầu)</dd></div>
+          </dl>
+          <p class="schedule-note">Thời gian theo giờ Việt Nam (UTC+7).</p>
           <p class="muted">{{ ev.venue.name }}, {{ ev.venue.city }}</p>
 
           <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
@@ -60,8 +69,6 @@ import { PageHeader } from '../../shared/page-header';
                       <strong class="to-name">{{ tt.name }}</strong>
                       @if (unavailableReason(tt)) {
                         <span class="to-reason">{{ unavailableReason(tt) }}</span>
-                      } @else if (tt.saleEnd) {
-                        <span class="to-note muted">Ngừng bán: {{ tt.saleEnd | dateTime }}</span>
                       }
                     </span>
                     <span class="to-right">
@@ -163,6 +170,30 @@ import { PageHeader } from '../../shared/page-header';
       display: block;
       padding-top: 32px;
     }
+    .booking-dates {
+      display: grid;
+      gap: 8px;
+      margin: 16px 0 0;
+      font-size: 0.9rem;
+    }
+    .booking-dates > div {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 12px;
+    }
+    .booking-dates dt {
+      min-width: 64px;
+      color: var(--app-muted);
+    }
+    .booking-dates dd {
+      margin: 0;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+    .schedule-note {
+      color: var(--app-muted);
+      font-size: 0.8rem;
+    }
     .booking-grid {
       display: grid;
       grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
@@ -214,14 +245,15 @@ import { PageHeader } from '../../shared/page-header';
         transform 0.12s ease;
     }
     .ticket-option:hover:not(:disabled) {
-      border-color: var(--app-ink);
+      border-color: var(--app-accent);
     }
     .ticket-option:active:not(:disabled) {
       transform: translateY(1px);
     }
     .ticket-option.selected {
-      border-color: var(--app-ink);
-      box-shadow: inset 0 0 0 1px var(--app-ink);
+      border-color: var(--app-accent);
+      box-shadow: inset 0 0 0 1px var(--app-accent);
+      background: var(--app-accent-soft);
     }
     .ticket-option:disabled {
       opacity: 0.55;
@@ -239,9 +271,6 @@ import { PageHeader } from '../../shared/page-header';
     .to-reason {
       font-size: 0.82rem;
       font-weight: 600;
-    }
-    .to-note {
-      font-size: 0.82rem;
     }
     .to-right {
       display: flex;
@@ -264,7 +293,7 @@ import { PageHeader } from '../../shared/page-header';
       background: transparent;
     }
     .ticket-option.selected .to-mark {
-      background: var(--app-ink);
+      background: var(--app-accent);
     }
 
     /* ---- Quantity stepper ---- */
@@ -341,6 +370,10 @@ import { PageHeader } from '../../shared/page-header';
     }
 
     /* ---- Summary ---- */
+    .summary {
+      border-top: 4px solid var(--app-accent);
+      background: linear-gradient(var(--app-accent-soft), var(--app-panel) 160px);
+    }
     .summary-line {
       display: flex;
       justify-content: space-between;
@@ -348,6 +381,7 @@ import { PageHeader } from '../../shared/page-header';
       margin: 0.4rem 0;
     }
     .total {
+      color: var(--app-accent-strong);
       font-size: 1.2rem;
       font-weight: 700;
       border-top: 1px solid var(--app-line);
@@ -385,7 +419,7 @@ export class BookingPage {
   protected readonly busy = signal(false);
   protected readonly error = signal('');
   protected readonly uncertain = signal(false);
-  private readonly now = signal(Date.now());
+  protected readonly now = signal(Date.now());
 
   protected readonly form = new FormGroup({
     ticketTypeId: new FormControl<number | null>(null),
@@ -442,9 +476,13 @@ export class BookingPage {
             switchMap((ev) => {
               this.event.set(ev);
               const requested = Number(query.get('ticketTypeId'));
+              const now = Date.now();
+              const requestedType = ev.ticketTypes.find((t) => t.id === requested);
               const tt =
-                ev.ticketTypes.find((t) => t.id === requested) ??
-                ev.ticketTypes.find((t) => !this.unavailableReason(t));
+                (requestedType && !ticketUnavailableReason(ev, requestedType, now)
+                  ? requestedType
+                  : undefined) ??
+                ev.ticketTypes.find((t) => !ticketUnavailableReason(ev, t, now));
               this.form.reset({ ticketTypeId: tt?.id ?? null, quantity: 1 });
               this.loading.set(false);
               return EMPTY;
@@ -466,19 +504,14 @@ export class BookingPage {
       .subscribe();
   }
 
-  protected unavailableReason(tt: TicketType): string {
-    const now = this.now();
+  protected unavailableReason(tt: TicketType, now = this.now()): string {
     const ev = this.event();
-    if (ev && Date.parse(ev.startTime) <= now) return 'Sự kiện đã bắt đầu, không thể đặt thêm vé.';
-    if (tt.saleStart && now < Date.parse(tt.saleStart)) return 'Hạng vé chưa đến giờ mở bán.';
-    if (tt.saleEnd && now >= Date.parse(tt.saleEnd)) return 'Hạng vé đã ngừng bán.';
-    if (tt.availableQuantity <= 0) return 'Hạng vé đã hết vé.';
-    return '';
+    return ev ? ticketUnavailableReason(ev, tt, now) : 'Không tải được lịch bán vé.';
   }
 
   /** Chọn hạng vé; reset số lượng về 1 trong giới hạn hợp lệ của hạng vừa chọn. */
   protected select(tt: TicketType): void {
-    if (this.busy() || this.uncertain() || this.unavailableReason(tt)) return;
+    if (this.busy() || this.uncertain() || this.unavailableReason(tt, Date.now())) return;
     this.form.controls.ticketTypeId.setValue(tt.id);
     const max = Math.max(0, Math.min(100, tt.maxPerOrder, tt.availableQuantity));
     this.form.controls.quantity.setValue(max > 0 ? 1 : 0);
@@ -499,10 +532,11 @@ export class BookingPage {
   }
 
   protected submit(): void {
-    if (this.busy() || this.uncertain() || this.validationError() || !this.session.isCustomer())
-      return;
+    if (this.busy() || this.uncertain() || !this.session.isCustomer()) return;
     const tt = this.selected();
-    if (!tt) return;
+    if (!tt || this.unavailableReason(tt, Date.now())) return;
+    const quantity = this.quantity();
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > this.limit()) return;
     this.error.set('');
     this.busy.set(true);
     this.orders

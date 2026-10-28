@@ -10,7 +10,7 @@ export class DateTimePipe implements PipeTransform {
   private readonly datePipe = new DatePipe('vi-VN');
 
   transform(value: string | null | undefined, format = 'HH:mm · dd/MM/yyyy'): string {
-    if (!value) return '—';
+    if (!value || !Number.isFinite(Date.parse(value))) return '—';
     return this.datePipe.transform(value, format, '+0700') ?? '—';
   }
 }

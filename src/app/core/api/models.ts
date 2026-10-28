@@ -38,14 +38,13 @@ export interface TicketType {
   soldQuantity: number;
   availableQuantity: number;
   maxPerOrder: number;
-  saleStart: string | null;
-  saleEnd: string | null;
 }
 
 export interface EventSummary {
   id: number;
   title: string;
   bannerUrl: string | null;
+  salesStartTime: string;
   startTime: string;
   endTime: string;
   category: Category;
@@ -57,6 +56,7 @@ export interface EventDetail {
   title: string;
   description: string | null;
   bannerUrl: string | null;
+  salesStartTime: string;
   startTime: string;
   endTime: string;
   category: Category;
@@ -72,6 +72,7 @@ export interface EventItem {
   title: string;
   description: string | null;
   bannerUrl: string | null;
+  salesStartTime: string;
   startTime: string;
   endTime: string;
   status: EventStatus;
@@ -178,6 +179,7 @@ export interface EventRequest {
   title: string;
   description?: string | null;
   bannerUrl?: string | null;
+  salesStartTime: string;
   startTime: string;
   endTime: string;
 }
@@ -187,8 +189,6 @@ export interface TicketTypeRequest {
   price: number;
   totalQuantity: number;
   maxPerOrder: number;
-  saleStart?: string | null;
-  saleEnd?: string | null;
 }
 
 export interface CategoryRequest {

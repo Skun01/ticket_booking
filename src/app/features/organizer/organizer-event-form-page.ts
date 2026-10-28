@@ -82,6 +82,16 @@ import { positiveId, uncertainWrite, vietnamDateInput, vietnamInstant } from './
           Nhập thời gian theo giờ Việt Nam (UTC+7), kể cả khi bạn đang ở múi giờ khác.
         </p>
         <mat-form-field appearance="outline">
+          <mat-label>Mở bán (giờ Việt Nam)</mat-label>
+          <input
+            matInput
+            type="datetime-local"
+            step="1"
+            formControlName="salesStartTime"
+            required
+          />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
           <mat-label>Bắt đầu (giờ Việt Nam)</mat-label>
           <input matInput type="datetime-local" step="1" formControlName="startTime" required />
         </mat-form-field>
@@ -89,6 +99,9 @@ import { positiveId, uncertainWrite, vietnamDateInput, vietnamInstant } from './
           <mat-label>Kết thúc (giờ Việt Nam)</mat-label>
           <input matInput type="datetime-local" step="1" formControlName="endTime" required />
         </mat-form-field>
+        <p class="muted">
+          Tất cả hạng vé cùng mở bán vào thời điểm này và tự động ngừng bán khi sự kiện bắt đầu.
+        </p>
         <mat-form-field appearance="outline" class="wide">
           <mat-label>URL banner (không bắt buộc)</mat-label>
           <input
@@ -185,6 +198,7 @@ export class OrganizerEventFormPage {
     title: [''],
     categoryId: [null as number | null],
     venueId: [null as number | null],
+    salesStartTime: [''],
     startTime: [''],
     endTime: [''],
     bannerUrl: [''],
@@ -250,6 +264,7 @@ export class OrganizerEventFormPage {
                   title: event.title,
                   categoryId: event.category.id,
                   venueId: event.venue.id,
+                  salesStartTime: vietnamDateInput(event.salesStartTime),
                   startTime: vietnamDateInput(event.startTime),
                   endTime: vietnamDateInput(event.endTime),
                   description: event.description ?? '',
@@ -259,6 +274,7 @@ export class OrganizerEventFormPage {
                   title: '',
                   categoryId: null,
                   venueId: null,
+                  salesStartTime: vietnamDateInput(new Date().toISOString()),
                   startTime: '',
                   endTime: '',
                   description: '',
@@ -278,7 +294,8 @@ export class OrganizerEventFormPage {
     this.error.set('');
     this.fieldErrors.set([]);
     const value = this.form.getRawValue();
-    const start = vietnamInstant(value.startTime),
+    const salesStart = vietnamInstant(value.salesStartTime),
+      start = vietnamInstant(value.startTime),
       end = vietnamInstant(value.endTime);
     if (!value.title.trim() || value.title.trim().length > 200) {
       this.error.set('Nhập tiêu đề từ 1 đến 200 ký tự.');
@@ -291,7 +308,15 @@ export class OrganizerEventFormPage {
       this.error.set('Vui lòng chọn danh mục và địa điểm hợp lệ.');
       return;
     }
-    if (!start || !end || Date.parse(start) <= Date.now() || Date.parse(end) <= Date.parse(start)) {
+    if (!salesStart || !start || !end) {
+      this.error.set('Vui lòng nhập thời gian mở bán, bắt đầu và kết thúc hợp lệ.');
+      return;
+    }
+    if (Date.parse(salesStart) >= Date.parse(start)) {
+      this.error.set('Giờ mở bán phải trước giờ bắt đầu sự kiện.');
+      return;
+    }
+    if (Date.parse(start) <= Date.now() || Date.parse(end) <= Date.parse(start)) {
       this.error.set('Giờ bắt đầu phải ở tương lai, giờ kết thúc phải sau giờ bắt đầu.');
       return;
     }
@@ -314,6 +339,7 @@ export class OrganizerEventFormPage {
       title: value.title.trim(),
       description: value.description || null,
       bannerUrl: value.bannerUrl.trim() || null,
+      salesStartTime: salesStart,
       startTime: start,
       endTime: end,
     };

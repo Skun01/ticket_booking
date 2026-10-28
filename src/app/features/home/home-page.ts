@@ -4,6 +4,8 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { interval } from 'rxjs';
+import { EventSalesStatus } from '../events/event-sales-status';
 import { CatalogApi } from '../../core/api/catalog.api';
 import { EventSummary } from '../../core/api/models';
 import { SessionService } from '../../core/auth/session.service';
@@ -12,7 +14,7 @@ import { Icon } from '../../shared/icon';
 
 @Component({
   selector: 'app-home-page',
-  imports: [LoadingState, RouterLink, MatButtonModule, Icon, DateTimePipe],
+  imports: [LoadingState, RouterLink, MatButtonModule, Icon, DateTimePipe, EventSalesStatus],
   template: `
     <section class="intro-section">
       <p class="eyebrow">NỀN TẢNG BÁN VÉ SỰ KIỆN</p>
@@ -58,7 +60,11 @@ import { Icon } from '../../shared/icon';
               <div class="event-body">
                 <span class="event-cat">{{ ev.category.name }}</span>
                 <h3>{{ ev.title }}</h3>
-                <p class="event-meta"><app-icon name="calendar" /> {{ ev.startTime | dateTime }}</p>
+                <app-event-sales-status [event]="ev" [now]="now()" />
+                <dl class="card-dates">
+                  <div><dt>Diễn ra</dt><dd>{{ ev.startTime | dateTime }}</dd></div>
+                  <div><dt>Mở bán</dt><dd>{{ ev.salesStartTime | dateTime }}</dd></div>
+                </dl>
                 <p class="event-meta">
                   <app-icon name="compass" /> {{ ev.venue.name }}, {{ ev.venue.city }}
                 </p>
@@ -103,18 +109,18 @@ import { Icon } from '../../shared/icon';
         transform 0.15s ease;
     }
     .event-card:hover {
-      border-color: var(--app-ink);
+      border-color: var(--app-accent);
       transform: translateY(-2px);
     }
     .event-banner {
       aspect-ratio: 16 / 9;
-      background: var(--app-soft);
+      background: linear-gradient(135deg, var(--app-accent-soft), var(--app-info-soft));
       background-size: cover;
       background-position: center;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--app-muted);
+      color: var(--app-accent);
       font-size: 2rem;
     }
     .event-body {
@@ -123,15 +129,26 @@ import { Icon } from '../../shared/icon';
       flex-direction: column;
       gap: 0.35rem;
     }
-    .event-cat {
-      font-size: 0.72rem;
-      font-weight: 750;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--app-muted);
-    }
     .event-body h3 {
       margin: 0.1rem 0 0.4rem;
+    }
+    .card-dates {
+      margin: 10px 0;
+      font-size: 0.85rem;
+    }
+    .card-dates > div {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2px 10px;
+      margin-top: 5px;
+    }
+    .card-dates dt {
+      color: var(--app-muted);
+      min-width: 56px;
+    }
+    .card-dates dd {
+      margin: 0;
+      font-weight: 700;
     }
     .event-meta {
       display: flex;
@@ -162,11 +179,15 @@ export class HomePage {
   protected readonly session = inject(SessionService);
   private readonly api = inject(CatalogApi);
 
+  protected readonly now = signal(Date.now());
   protected readonly featured = signal<EventSummary[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal('');
 
   constructor() {
+    interval(1000)
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.now.set(Date.now()));
     this.load();
   }
 

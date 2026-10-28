@@ -18,6 +18,7 @@ const fieldMessages: Record<string, string> = {
   fullName: 'Vui lòng nhập họ và tên.',
   quantity: 'Số lượng vé không hợp lệ.',
   ticketTypeId: 'Vui lòng chọn hạng vé hợp lệ.',
+  salesStartTime: 'Vui lòng nhập giờ mở bán hợp lệ và trước giờ bắt đầu sự kiện.',
   ticketCode: 'Mã vé phải từ 1 đến 40 ký tự, không chỉ gồm khoảng trắng.',
 };
 
@@ -35,7 +36,7 @@ const codeMessages: Record<string, string> = {
   CUSTOMER_INACTIVE: 'Tài khoản khách hàng không hoạt động.',
   INVALID_ORDER_QUANTITY: 'Số lượng phải từ 1 đến 100 và không vượt giới hạn của hạng vé.',
   EVENT_NOT_BOOKABLE: 'Sự kiện không còn nhận đặt vé hoặc thanh toán.',
-  SALE_NOT_OPEN: 'Hạng vé chưa mở bán hoặc đã ngừng bán.',
+  SALE_NOT_OPEN: 'Sự kiện chưa mở bán hoặc đã ngừng bán.',
   SOLD_OUT: 'Không đủ vé cho số lượng đã chọn. Vui lòng quay lại sự kiện để cập nhật tồn kho.',
   INVENTORY_CONFLICT: 'Chưa cập nhật được tồn kho. Vui lòng kiểm tra lại đơn.',
   ORDER_NOT_PENDING: 'Đơn không còn ở trạng thái chờ thanh toán. Vui lòng cập nhật đơn.',
@@ -61,7 +62,7 @@ const codeMessages: Record<string, string> = {
   EVENT_HAS_NO_TICKET_TYPES: 'Thêm ít nhất một hạng vé trước khi phát hành sự kiện.',
   VENUE_CAPACITY_EXCEEDED: 'Tổng số vé các hạng vượt sức chứa địa điểm.',
   TICKET_TYPE_NOT_FOUND: 'Không tìm thấy hạng vé.',
-  INVALID_SALE_TIME: 'Khoảng giờ bán không hợp lệ hoặc vượt giờ bắt đầu sự kiện.',
+  INVALID_SALES_START_TIME: 'Giờ mở bán phải hợp lệ và trước giờ bắt đầu sự kiện.',
   INVALID_TICKET_QUANTITY: 'Giới hạn mỗi đơn không được vượt tổng số vé của hạng.',
   QUANTITY_BELOW_SOLD: 'Tổng vé không được thấp hơn số đã bán hoặc đang giữ chỗ.',
   CATEGORY_NOT_FOUND: 'Danh mục không còn tồn tại. Vui lòng tải lại form.',
