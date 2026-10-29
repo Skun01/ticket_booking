@@ -1,152 +1,327 @@
-    <app-page-header
-      title="Chi tiết đơn vé"
-      subtitle="Kiểm tra đơn và hoàn tất thanh toán trong thời gian giữ chỗ."
-    >
-      <a mat-stroked-button routerLink="/orders">Đơn của tôi</a>
-    </app-page-header>
-    @if (error()) {
-      <p class="form-notice error" role="alert">{{ error() }}</p>
+<a class="back-link" routerLink="/orders"><app-icon name="left" /> Đơn của tôi</a>
+
+<header class="checkout-heading">
+  <div>
+    <p class="eyebrow">ĐẶT VÉ / THANH TOÁN</p>
+    <h1>{{ order()?.status === 'PAID' ? 'Đặt vé thành công' : 'Thanh toán đơn vé' }}</h1>
+    <p class="muted">
+      {{
+        order()?.status === 'PAID'
+          ? 'Mọi thứ đã sẵn sàng. Hẹn gặp bạn tại sự kiện.'
+          : 'Chỉ còn một bước để nhận vé điện tử của bạn.'
+      }}
+    </p>
+  </div>
+  <span class="secure-label"><app-icon name="shield" /> Thanh toán qua PayOS</span>
+</header>
+
+<ol class="checkout-steps" aria-label="Các bước đặt vé">
+  <li [class.complete]="!!order()" [attr.aria-current]="noOrderSelected() ? 'step' : null">
+    <span class="step-number">
+      @if (order()) {
+        <app-icon name="check" />
+      } @else {
+        1
+      }
+    </span>
+    <span>Chọn vé</span>
+  </li>
+  <li
+    [class.current]="order()?.status !== 'PAID' && !noOrderSelected()"
+    [class.complete]="order()?.status === 'PAID'"
+    [attr.aria-current]="order()?.status !== 'PAID' && !noOrderSelected() ? 'step' : null"
+  >
+    <span class="step-number">
+      @if (order()?.status === 'PAID') {
+        <app-icon name="check" />
+      } @else {
+        2
+      }
+    </span>
+    <span>Thanh toán</span>
+  </li>
+  <li
+    [class.current]="order()?.status === 'PAID'"
+    [attr.aria-current]="order()?.status === 'PAID' ? 'step' : null"
+  >
+    <span class="step-number">3</span><span>Nhận vé</span>
+  </li>
+</ol>
+
+@if (error()) {
+  <div class="error-banner" role="alert">
+    <app-icon name="info" />
+    <div>
+      <strong>Chưa thể xác nhận trạng thái đơn</strong>
+      <p>{{ error() }}</p>
       @if (authRequired()) {
-        <a mat-stroked-button routerLink="/login" [queryParams]="{ returnUrl: '/orders/' + id() }"
+        <a mat-stroked-button routerLink="/login" [queryParams]="{ returnUrl: loginReturnUrl() }"
           >Đăng nhập lại</a
         >
       }
-    }
-    @if (notice()) {
-      <p class="form-notice success" role="status">{{ notice() }}</p>
-    }
-    @if (loading()) {
-      <app-loading-state label="Đang tải đơn vé…" />
-    } @else if (order(); as order) {
-      <section class="panel">
-        <div class="order-heading">
-          <h2>{{ order.orderCode }}</h2>
-          <app-status-badge [status]="order.status" />
-        </div>
-        <p class="muted">Đặt lúc {{ order.createdAt | dateTime }}</p>
-        @if (order.status === 'PENDING') {
-          @if (expired()) {
-            <p class="form-notice warning" role="status">
-              Đã hết thời gian giữ chỗ. Không thể tiếp tục thanh toán. Trạng thái được xác nhận từ
-              máy chủ khi cập nhật đơn.
+    </div>
+  </div>
+}
+
+@if (loading()) {
+  <section class="checkout-card loading-card" aria-label="Đang tải thông tin thanh toán">
+    <app-loading-state
+      [label]="
+        paymentReturn()
+          ? paymentCancelled()
+            ? 'Đang kiểm tra trạng thái đơn…'
+            : 'Đang đối soát thanh toán với máy chủ…'
+          : 'Đang tải đơn vé…'
+      "
+    />
+    <p class="muted">
+      {{
+        paymentReturn()
+          ? 'Kết quả được kiểm tra trực tiếp từ máy chủ. Bạn không cần thao tác thêm.'
+          : 'Đang chuẩn bị thông tin đơn vé và số tiền thanh toán.'
+      }}
+    </p>
+  </section>
+} @else if (order(); as order) {
+  <div class="checkout-grid">
+    <div class="checkout-main">
+      <section
+        class="checkout-card payment-card"
+        [class.pending]="order.status === 'PENDING'"
+        aria-labelledby="payment-title"
+      >
+        <div class="state-content" aria-live="polite" aria-atomic="true">
+          <span
+            class="state-icon"
+            [class.success]="order.status === 'PAID'"
+            [class.warning]="order.status === 'PENDING' && (expired() || paymentCancelled())"
+            [class.closed]="order.status === 'CANCELLED' || order.status === 'EXPIRED'"
+          >
+            <app-icon
+              [name]="
+                order.status === 'PAID'
+                  ? 'check'
+                  : order.status !== 'PENDING' || expired()
+                    ? 'clock'
+                    : paymentCancelled()
+                      ? 'left'
+                      : 'lock'
+              "
+            />
+          </span>
+          @if (order.status === 'PAID') {
+            <h2 id="payment-title">Thanh toán thành công</h2>
+            <p class="state-description">
+              Vé điện tử của bạn đã được phát hành. Mở Vé của tôi để xem mã QR hoặc tải vé PDF.
+            </p>
+          } @else if (order.status === 'CANCELLED') {
+            <h2 id="payment-title">Đơn vé đã được hủy</h2>
+            <p class="state-description">
+              Số vé giữ chỗ đã được trả lại. Bạn có thể chọn sự kiện và đặt một đơn mới.
+            </p>
+          } @else if (order.status === 'EXPIRED' || expired()) {
+            <h2 id="payment-title">Đã hết thời gian giữ chỗ</h2>
+            <p class="state-description">
+              Không thể tiếp tục thanh toán đơn này. Vui lòng chọn vé và tạo đơn mới.
+            </p>
+          } @else if (checkingPayment()) {
+            <h2 id="payment-title">Đang đối soát thanh toán</h2>
+            <p class="state-description">
+              Đang chờ xác nhận từ máy chủ. Nếu đã chuyển tiền, bạn không cần thanh toán lại.
+            </p>
+          } @else if (needsRefresh()) {
+            <h2 id="payment-title">Kiểm tra đơn trước khi tiếp tục</h2>
+            <p class="state-description">
+              Cập nhật đơn để xác nhận kết quả thao tác vừa rồi trước khi thanh toán hoặc hủy đơn.
+            </p>
+          } @else if (paymentCancelled()) {
+            <h2 id="payment-title">Thanh toán chưa hoàn tất</h2>
+            <p class="state-description">
+              Bạn đã quay lại sau khi hủy thanh toán trên PayOS. Đơn vé chưa bị hủy. Bạn có thể tiếp
+              tục thanh toán hoặc hủy đơn vé.
+            </p>
+          } @else if (paymentReturn()) {
+            <h2 id="payment-title">Chưa nhận được xác nhận</h2>
+            <p class="state-description">
+              Máy chủ chưa xác nhận thanh toán. Nếu đã chuyển tiền, vui lòng chờ rồi bấm Cập nhật
+              đơn; không chuyển tiền thêm lần nữa.
             </p>
           } @else {
-            <p class="countdown">
-              Thời gian giữ chỗ còn lại: <strong>{{ countdown() }}</strong>
+            <h2 id="payment-title">Hoàn tất thanh toán</h2>
+            <p class="state-description">
+              Thanh toán trong thời gian giữ chỗ để nhận vé. Bạn sẽ hoàn tất giao dịch trên trang
+              PayOS.
             </p>
-          }
-          <p class="muted">Hạn thanh toán: {{ order.expiresAt | dateTime }} (giờ Việt Nam)</p>
-        }
-        <div class="items">
-          @for (item of order.items; track item.id) {
-            <div class="item-row">
-              <div>
-                <strong>{{ item.ticketTypeName }}</strong
-                ><br />
-                <a [routerLink]="['/events', item.eventId]">Xem sự kiện</a>
-              </div>
-              <span>{{ item.quantity }} × {{ item.unitPrice | money }}</span>
-              <strong>{{ item.quantity * item.unitPrice | money }}</strong>
-            </div>
           }
         </div>
-        <dl class="totals">
-          <div>
-            <dt>Giảm giá</dt>
-            <dd>{{ order.discountAmount | money }}</dd>
-          </div>
-          <div class="grand-total">
-            <dt>Tổng thanh toán</dt>
-            <dd>{{ order.totalAmount | money }}</dd>
-          </div>
-        </dl>
-      </section>
-      @if (order.status === 'PENDING') {
-        <section class="panel" aria-labelledby="payment-title">
-          <h2 id="payment-title">Thanh toán giả lập</h2>
-          <p class="muted">
-            Phương thức MOCK chỉ mô phỏng giao dịch, không trừ tiền thật và không yêu cầu thông tin
-            thẻ.
-          </p>
-          <mat-checkbox [formControl]="simulateFailure" [disabled]="busy() || refreshing()"
-            >Mô phỏng thanh toán thất bại</mat-checkbox
-          >
-          @if (needsRefresh()) {
-            <p class="form-notice warning" role="status">
-              Chưa xác nhận được trạng thái mới nhất. Hãy cập nhật đơn trước khi thao tác lại; không
-              gửi thanh toán liên tục.
+
+        @if (notice() && order.status === 'PENDING') {
+          <p class="form-notice" role="status">{{ notice() }}</p>
+        }
+
+        @if (order.status === 'PENDING') {
+          @if (!expired()) {
+            <div class="payment-method">
+              <span class="method-icon"><app-icon name="qr" /></span>
+              <div><strong>PayOS</strong><span>Quét mã QR · Chuyển khoản ngân hàng</span></div>
+              <app-icon class="method-check" name="check" />
+            </div>
+            <p class="method-note">
+              <app-icon name="lock" /> Thông tin thanh toán được thực hiện trên PayOS.
             </p>
           }
-          <div class="form-actions">
+
+          @if (!expired()) {
+            <div class="mobile-total">
+              <span
+                >Tổng thanh toán <strong>{{ order.totalAmount | money }}</strong></span
+              >
+              <small><app-icon name="clock" /> Giữ chỗ còn {{ countdown() }}</small>
+            </div>
+          }
+          <div class="payment-actions">
             <button
               mat-flat-button
               type="button"
+              class="primary-action"
               data-action="pay"
               (click)="pay()"
               [disabled]="!canPay()"
-              [attr.aria-busy]="busy()"
+              [attr.aria-busy]="actionName() === 'pay' || redirecting()"
             >
-              {{ actionName() === 'pay' ? 'Đang thanh toán…' : 'Thanh toán' }}
+              <app-icon name="lock" />{{ payLabel() }}
             </button>
             <button
               mat-stroked-button
               type="button"
-              (click)="confirmCancel.set(true)"
-              [disabled]="!canPay()"
+              class="refresh-action"
+              (click)="load()"
+              [disabled]="!canRefresh()"
+              [attr.aria-busy]="refreshing() || checkingPayment()"
             >
-              Hủy đơn
+              <app-icon name="refresh" />{{
+                refreshing() || checkingPayment() ? 'Đang cập nhật…' : 'Cập nhật đơn'
+              }}
             </button>
           </div>
-          @if (confirmCancel()) {
-            <div class="form-notice warning" role="group" appFocusOnShow aria-label="Xác nhận hủy đơn">
-              <p>Hủy đơn này và trả lại số vé đang giữ chỗ?</p>
-              <div class="form-actions">
-                <button
-                  mat-flat-button
-                  type="button"
-                  data-action="cancel"
-                  (click)="cancel()"
-                  [disabled]="!canPay()"
-                >
-                  Xác nhận hủy
-                </button>
-                <button
-                  mat-stroked-button
-                  type="button"
-                  (click)="confirmCancel.set(false)"
-                  [disabled]="busy()"
-                >
-                  Giữ đơn
-                </button>
-              </div>
+          @if (!expired()) {
+            <p class="payment-hint">Vé được phát hành sau khi máy chủ xác nhận thanh toán.</p>
+          } @else {
+            <a class="new-order-link" routerLink="/events"
+              >Chọn vé và đặt đơn mới <app-icon name="right"
+            /></a>
+          }
+        } @else if (order.status === 'PAID') {
+          <div class="ticket-ready">
+            <app-icon name="ticket" /><span>{{ ticketCount() }} vé điện tử đã sẵn sàng</span>
+          </div>
+          <a mat-flat-button class="primary-action" routerLink="/tickets"
+            ><app-icon name="ticket" /> Vé của tôi</a
+          >
+          <p class="payment-hint">Dùng mã QR trên vé để check-in tại sự kiện.</p>
+        } @else {
+          <a mat-flat-button class="primary-action" routerLink="/events"
+            >Khám phá sự kiện <app-icon name="right"
+          /></a>
+        }
+      </section>
+
+      @if (order.status === 'PENDING') {
+        <div class="payment-help">
+          <details>
+            <summary>Đã chuyển tiền nhưng chưa nhận vé?</summary>
+            <p>
+              Hãy bấm Cập nhật đơn để kiểm tra lại. Không chuyển tiền thêm hoặc hủy đơn khi bạn đã
+              thanh toán. Nếu đơn hết hạn hoặc đã hủy mà bạn đã chuyển tiền, hãy liên hệ đơn vị tổ
+              chức và cung cấp mã đơn cùng chứng từ giao dịch.
+            </p>
+          </details>
+          @if (!expired()) {
+            <div class="cancel-row">
+              <span>Không muốn tiếp tục?</span>
+              <button
+                mat-button
+                type="button"
+                (click)="confirmCancel.set(true)"
+                [disabled]="!canPay()"
+              >
+                Hủy đơn
+              </button>
             </div>
           }
-        </section>
-      } @else if (order.status === 'PAID') {
-        <section class="panel payment-success">
-          <h2>Thanh toán thành công</h2>
-          <p>Vé điện tử của đơn đã được phát hành. Bạn có thể tải từng vé PDF có mã QR.</p>
-          <a mat-flat-button routerLink="/tickets">Vé của tôi</a>
-        </section>
-      } @else {
-        <section class="panel">
-          <p>
-            Đơn đã {{ order.status === 'EXPIRED' ? 'hết hạn' : 'bị hủy' }}. Không thể thanh toán lại
-            đơn này.
-          </p>
-          <a mat-stroked-button routerLink="/events">Chọn sự kiện khác</a>
-        </section>
+        </div>
+        @if (confirmCancel()) {
+          <section
+            class="cancel-confirmation"
+            role="group"
+            appFocusOnShow
+            aria-labelledby="cancel-title"
+          >
+            <h3 id="cancel-title">Bạn muốn hủy đơn vé này?</h3>
+            <p>Vé đang giữ chỗ sẽ được trả lại. Chỉ xác nhận nếu bạn chưa chuyển tiền.</p>
+            <p class="muted">Hủy đơn không tự hoàn tiền hoặc vô hiệu hóa liên kết PayOS đã tạo.</p>
+            <div class="form-actions">
+              <button
+                mat-flat-button
+                class="cancel-action"
+                type="button"
+                data-action="cancel"
+                (click)="cancel()"
+                [disabled]="!canPay()"
+              >
+                Xác nhận hủy
+              </button>
+              <button
+                mat-stroked-button
+                type="button"
+                (click)="confirmCancel.set(false)"
+                [disabled]="busy()"
+              >
+                Giữ đơn
+              </button>
+            </div>
+          </section>
+        }
       }
-      <div class="form-actions">
-        <button
-          mat-stroked-button
-          type="button"
-          (click)="load()"
-          [disabled]="busy() || refreshing()"
-        >
-          {{ refreshing() ? 'Đang cập nhật…' : 'Cập nhật đơn' }}
+    </div>
+
+    <app-order-summary
+      class="checkout-card order-summary"
+      [order]="order"
+      [expired]="expired()"
+      [remaining]="remaining()"
+      [countdown]="countdown()"
+    />
+  </div>
+} @else if (noOrderSelected()) {
+  <section class="checkout-card empty-payment">
+    <span class="state-icon"><app-icon name="ticket" /></span>
+    <h2>Chọn đơn vé để thanh toán</h2>
+    <p class="state-description">
+      Mở một đơn đang chờ thanh toán trong Đơn của tôi, hoặc chọn sự kiện để đặt vé mới.
+    </p>
+    <div class="empty-actions">
+      <a mat-flat-button class="primary-action" routerLink="/orders"
+        >Xem đơn của tôi <app-icon name="right"
+      /></a>
+      <a mat-stroked-button routerLink="/events">Khám phá sự kiện</a>
+    </div>
+    <p class="payment-hint">
+      <app-icon name="lock" /> Chỉ thanh toán cho đơn vé thuộc tài khoản của bạn.
+    </p>
+  </section>
+} @else {
+  <section class="checkout-card empty-payment">
+    <span class="state-icon"><app-icon name="info" /></span>
+    <h2>Chưa thể mở thông tin thanh toán</h2>
+    <p class="state-description">Bạn có thể thử tải lại hoặc tìm đơn vé trong Đơn của tôi.</p>
+    <div class="empty-actions">
+      @if (id()) {
+        <button mat-flat-button type="button" class="primary-action" (click)="load()">
+          Thử lại
         </button>
-      </div>
-    } @else if (id()) {
-      <button mat-stroked-button type="button" (click)="load()">Thử lại</button>
-    }
+      }
+      <a mat-stroked-button routerLink="/orders">Đơn của tôi</a>
+    </div>
+  </section>
+}

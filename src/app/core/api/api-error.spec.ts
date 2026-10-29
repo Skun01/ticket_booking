@@ -25,6 +25,16 @@ describe('API error presentation', () => {
       .toBe('Email hoặc mật khẩu không chính xác.');
   });
 
+  it('presents a PayOS checkout error without encouraging immediate duplicate payment', () => {
+    const result = apiError(new HttpErrorResponse({
+      status: 502,
+      error: { code: 'PAYMENT_LINK_CREATION_FAILED', detail: 'gateway secret' },
+    }));
+    expect(result.message).toContain('PayOS');
+    expect(result.message).toContain('cập nhật đơn');
+    expect(result.message).not.toContain('gateway secret');
+  });
+
   it('does not expose unexpected exception text', () => {
     const result = apiError(new HttpErrorResponse({ status: 500, error: { detail: 'SQL secret' } }));
     expect(result.message).not.toContain('SQL');

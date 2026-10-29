@@ -42,7 +42,11 @@ const codeMessages: Record<string, string> = {
   ORDER_NOT_PENDING: 'Đơn không còn ở trạng thái chờ thanh toán. Vui lòng cập nhật đơn.',
   ORDER_EXPIRED: 'Đơn đã hết thời hạn giữ chỗ. Vui lòng đặt đơn mới.',
   PAYMENT_DECLINED:
-    'Thanh toán giả lập thất bại. Đơn chưa được thanh toán; bạn có thể tắt mô phỏng thất bại và thử lại khi còn hạn.',
+    'Thanh toán không thành công. Vui lòng kiểm tra trạng thái đơn trước khi thử lại.',
+  PAYMENT_LINK_CREATION_FAILED:
+    'Chưa tạo được liên kết PayOS. Hãy cập nhật đơn để kiểm tra trạng thái trước khi thử lại.',
+  PAYMENT_LINK_NOT_FOUND:
+    'Không tìm thấy liên kết PayOS. Vui lòng cập nhật đơn trước khi thanh toán.',
   TICKET_NOT_FOUND: 'Không tìm thấy vé.',
   TICKET_NOT_OWNED: 'Bạn không có quyền tải vé này.',
   TICKET_NOT_OWNED_BY_ORGANIZER: 'Vé không thuộc sự kiện do bạn tổ chức. Không thể check-in.',

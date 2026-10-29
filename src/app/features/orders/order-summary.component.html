@@ -1,0 +1,53 @@
+@let current = order();
+<aside aria-labelledby="summary-title">
+  <div class="summary-heading">
+    <h2 id="summary-title">Tóm tắt đơn vé</h2>
+    <app-status-badge [status]="current.status" />
+  </div>
+  <div class="order-reference">
+    <span>Mã đơn</span><strong>{{ current.orderCode }}</strong>
+  </div>
+  <p class="created-at">Đặt lúc {{ current.createdAt | dateTime }}</p>
+  <div class="order-items">
+    @for (item of current.items; track item.id) {
+      <div class="order-item">
+        <span class="ticket-icon"><app-icon name="ticket" /></span>
+        <div class="item-description">
+          <strong>{{ item.ticketTypeName }}</strong>
+          <span>{{ item.quantity }} vé × {{ item.unitPrice | money }}</span>
+          <a [routerLink]="['/events', item.eventId]">Xem sự kiện <app-icon name="right" /></a>
+        </div>
+        <strong class="item-price">{{ item.quantity * item.unitPrice | money }}</strong>
+      </div>
+    }
+  </div>
+  <dl class="totals">
+    <div>
+      <dt>Tạm tính · {{ ticketCount() }} vé</dt>
+      <dd>{{ subtotal() | money }}</dd>
+    </div>
+    <div>
+      <dt>Giảm giá</dt>
+      <dd>{{ current.discountAmount | money }}</dd>
+    </div>
+    <div class="grand-total">
+      <dt>{{ current.status === 'PAID' ? 'Đã thanh toán' : 'Tổng thanh toán' }}</dt>
+      <dd>{{ current.totalAmount | money }}</dd>
+    </div>
+  </dl>
+  @if (current.status === 'PENDING' && !expired()) {
+    <div class="hold-notice" [class.urgent]="remaining() <= 60">
+      <div>
+        <app-icon name="clock" /><span>Giữ chỗ còn</span
+        ><strong aria-live="off">{{ countdown() }}</strong>
+      </div>
+      <p>Đơn vẫn được giữ đến {{ current.expiresAt | dateTime }} (giờ Việt Nam).</p>
+    </div>
+  } @else if (current.status === 'PENDING') {
+    <p class="summary-note">
+      <app-icon name="clock" /> Thời gian giữ chỗ đã kết thúc. Trạng thái đơn sẽ được xác nhận khi
+      cập nhật.
+    </p>
+  }
+  <p class="summary-note"><app-icon name="info" /> Giá và số lượng được xác nhận theo đơn vé.</p>
+</aside>

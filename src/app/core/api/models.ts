@@ -4,8 +4,26 @@
 export type EventStatus = 'DRAFT' | 'PUBLISHED' | 'CANCELLED' | 'ENDED';
 export type OrderStatus = 'PENDING' | 'PAID' | 'CANCELLED' | 'EXPIRED';
 export type TicketStatus = 'VALID' | 'USED' | 'CANCELLED';
-export type PaymentMethod = 'MOCK';
+export type PaymentMethod = 'MOCK' | 'PAYOS';
+export type PayOSPaymentStatus =
+  | 'PENDING'
+  | 'CANCELLED'
+  | 'UNDERPAID'
+  | 'PAID'
+  | 'EXPIRED'
+  | 'PROCESSING'
+  | 'FAILED';
 export type Role = 'ADMIN' | 'ORGANIZER' | 'CUSTOMER';
+
+export interface PayOSCheckout {
+  orderId: number;
+  orderCode: number;
+  checkoutUrl: string;
+  qrCode: string;
+  paymentLinkId: string;
+  amount: number;
+  status: PayOSPaymentStatus;
+}
 
 export interface PageResponse<T> {
   content: T[];
@@ -169,7 +187,8 @@ export interface CreateOrderRequest {
 }
 
 export interface PayOrderRequest {
-  method: PaymentMethod;
+  // /pay chỉ dành cho giả lập; PAYOS phải dùng /payos-checkout.
+  method: 'MOCK';
   simulateFailure: boolean;
 }
 

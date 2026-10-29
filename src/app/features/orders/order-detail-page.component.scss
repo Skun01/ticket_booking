@@ -1,0 +1,337 @@
+:host {
+  display: block;
+  padding-top: 28px;
+}
+.back-link,
+.secure-label,
+.method-note,
+.new-order-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.back-link {
+  width: fit-content;
+  color: var(--app-muted);
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+.checkout-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 24px 0 28px;
+}
+h1 {
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  letter-spacing: -0.045em;
+  margin-bottom: 10px;
+}
+.checkout-heading p {
+  margin-bottom: 0;
+}
+.checkout-heading .eyebrow {
+  margin-bottom: 10px;
+  font-size: 0.65rem;
+}
+.secure-label {
+  color: var(--app-accent-strong);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+.checkout-steps {
+  display: flex;
+  list-style: none;
+  padding: 0 0 24px;
+  margin: 0 0 28px;
+  border-bottom: 1px solid var(--app-line);
+  gap: 16px;
+  font-size: 0.8rem;
+  color: var(--app-muted);
+}
+.checkout-steps li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.checkout-steps li + li::before {
+  content: '';
+  width: 40px;
+  height: 1px;
+  margin-right: 6px;
+  background: var(--app-line);
+}
+.step-number {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--app-line);
+  border-radius: 50%;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+.current {
+  color: var(--app-ink);
+  font-weight: 700;
+}
+.current .step-number {
+  background: var(--app-ink);
+  color: var(--app-inverse);
+  border-color: var(--app-ink);
+}
+.complete .step-number {
+  background: var(--app-accent-soft);
+  color: var(--app-accent-strong);
+  border-color: var(--app-accent-line);
+}
+.checkout-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.95fr);
+  gap: 24px;
+  align-items: start;
+}
+.checkout-card {
+  min-width: 0;
+  padding: 30px;
+  border: 1px solid var(--app-line);
+  border-radius: 12px;
+  background: var(--app-panel);
+  overflow-wrap: anywhere;
+}
+.payment-card {
+  border-top: 3px solid var(--app-accent);
+}
+.state-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid var(--app-accent-line);
+  border-radius: 14px;
+  background: var(--app-accent-soft);
+  color: var(--app-accent-strong);
+  font-size: 1.35rem;
+  margin-bottom: 22px;
+}
+.success {
+  color: var(--app-success);
+  background: var(--app-success-soft);
+  border-color: var(--app-success-line);
+}
+.warning {
+  color: var(--app-warning);
+  background: var(--app-warning-soft);
+  border-color: var(--app-warning-line);
+}
+.closed {
+  color: var(--app-muted);
+  background: var(--app-bg);
+  border-color: var(--app-line);
+}
+h2 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+.state-description {
+  color: var(--app-muted);
+  font-size: 0.9rem;
+  margin-bottom: 24px;
+}
+.payment-method {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--app-accent-line);
+  border-radius: 8px;
+  background: var(--app-accent-soft);
+}
+.payment-method div {
+  min-width: 0;
+  flex: 1;
+}
+.payment-method div span {
+  display: block;
+  margin-top: 2px;
+  color: var(--app-muted);
+  font-size: 0.78rem;
+}
+.method-icon {
+  font-size: 1.7rem;
+}
+.method-icon,
+.method-check {
+  color: var(--app-accent-strong);
+}
+.method-note,
+.payment-hint {
+  color: var(--app-muted);
+  font-size: 0.75rem;
+}
+.method-note {
+  margin: 12px 0 26px;
+}
+.payment-actions,
+.empty-actions {
+  display: grid;
+  gap: 10px;
+}
+.payment-actions {
+  margin-top: 24px;
+}
+.primary-action {
+  width: 100%;
+  min-height: 48px;
+  --mat-button-filled-container-color: var(--app-accent-strong);
+  --mat-button-filled-label-text-color: var(--app-inverse);
+  --mat-button-filled-container-shape: 8px;
+}
+.refresh-action {
+  width: 100%;
+  min-height: 44px;
+  --mat-button-outlined-container-shape: 8px;
+}
+.payment-hint {
+  text-align: center;
+  margin: 14px 0 0;
+}
+.new-order-link {
+  justify-content: center;
+  font-size: 0.85rem;
+  margin-top: 18px;
+}
+.payment-help {
+  font-size: 0.82rem;
+  padding: 20px 6px 0;
+  color: var(--app-muted);
+}
+summary {
+  cursor: pointer;
+  color: var(--app-ink);
+  font-weight: 600;
+  padding: 4px 0;
+}
+.cancel-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--app-line);
+}
+.cancel-confirmation,
+.error-banner {
+  padding: 22px;
+  border: 1px solid var(--app-danger-line);
+  border-radius: 10px;
+  background: var(--app-danger-soft);
+  margin-top: 18px;
+  font-size: 0.85rem;
+}
+.error-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0 0 24px;
+  color: var(--app-danger);
+}
+.error-banner p {
+  margin: 4px 0 12px;
+}
+.cancel-action {
+  --mat-button-filled-container-color: var(--app-danger);
+  --mat-button-filled-label-text-color: var(--app-inverse);
+}
+.order-summary {
+  position: sticky;
+  top: 24px;
+  padding: 26px;
+}
+.ticket-ready {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  margin-bottom: 24px;
+  color: var(--app-success);
+  background: var(--app-success-soft);
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+.loading-card,
+.empty-payment {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 40px;
+}
+.empty-payment {
+  text-align: center;
+}
+.empty-payment .state-icon {
+  margin: 0 auto 24px;
+}
+.empty-actions {
+  max-width: 320px;
+  margin: 0 auto;
+}
+.mobile-total {
+  display: none;
+}
+@media (max-width: 900px) {
+  .checkout-grid {
+    grid-template-columns: 1fr;
+  }
+  .order-summary {
+    position: static;
+  }
+  .mobile-total {
+    display: grid;
+    gap: 6px;
+    padding-top: 18px;
+    border-top: 1px solid var(--app-line);
+  }
+  .mobile-total span {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 0.85rem;
+  }
+  .mobile-total strong {
+    color: var(--app-accent-strong);
+    font-size: 1.2rem;
+  }
+  .mobile-total small {
+    color: var(--app-warning);
+    font-size: 0.75rem;
+  }
+}
+@media (max-width: 600px) {
+  :host {
+    padding-top: 20px;
+  }
+  .checkout-heading {
+    display: block;
+    margin: 20px 0;
+  }
+  .secure-label,
+  .checkout-heading .eyebrow,
+  .payment-card.pending .state-icon {
+    display: none;
+  }
+  .checkout-steps {
+    gap: 12px;
+    font-size: 0.72rem;
+  }
+  .checkout-steps li {
+    gap: 6px;
+  }
+  .checkout-steps li + li::before {
+    display: none;
+  }
+  .checkout-card {
+    padding: 22px;
+  }
+}

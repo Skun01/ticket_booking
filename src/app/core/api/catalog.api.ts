@@ -16,6 +16,7 @@ import {
   OrderSummary,
   PageResponse,
   PayOrderRequest,
+  PayOSCheckout,
   RevenueReport,
   Ticket,
   TicketType,
@@ -84,6 +85,14 @@ export class OrderApi {
 
   pay(id: number, request: PayOrderRequest): Observable<Order> {
     return this.http.post<Order>(`${this.base}/orders/${id}/pay`, request);
+  }
+
+  createPayOSCheckout(id: number): Observable<PayOSCheckout> {
+    return this.http.post<PayOSCheckout>(`${this.base}/orders/${id}/payos-checkout`, null);
+  }
+
+  syncPayOS(id: number): Observable<Order> {
+    return this.http.post<Order>(`${this.base}/orders/${id}/payos-sync`, null);
   }
 
   cancel(id: number): Observable<Order> {

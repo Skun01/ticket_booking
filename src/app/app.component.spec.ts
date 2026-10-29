@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { App } from './app.component';
 import { routes } from './app.routes';
@@ -41,6 +41,15 @@ describe('Application Shell', () => {
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
     expect(fixture.nativeElement).toBeTruthy();
+  });
+
+  it.each(['success', 'cancel'])('preserves the PayOS %s callback while requesting login', async (result) => {
+    const harness = await RouterTestingHarness.create();
+    const returnUrl = `/payment/${result}?orderCode=42&id=payos-link&status=PAID`;
+    await harness.navigateByUrl(returnUrl);
+    const router = TestBed.inject(Router);
+    expect(router.parseUrl(router.url).root.children['primary'].segments[0].path).toBe('login');
+    expect(router.parseUrl(router.url).queryParams['returnUrl']).toBe(returnUrl);
   });
 
   it('loads the home page at /', async () => {

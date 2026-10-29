@@ -4,104 +4,36 @@ import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
-import { MatCheckbox } from '@angular/material/checkbox';
-import { Subscription, distinctUntilChanged, finalize, interval, map } from 'rxjs';
+import { PaymentNavigation } from '../../core/api/payment-navigation.service';
+import {
+  Subscription,
+  combineLatest,
+  distinctUntilChanged,
+  finalize,
+  interval,
+  map,
+  of,
+  switchMap,
+} from 'rxjs';
 import { OrderApi } from '../../core/api/catalog.api';
 import { FeedbackService } from '../../shared/feedback.service';
-import { Order } from '../../core/api/models';
+import { Order, PayOSCheckout } from '../../core/api/models';
 import { SessionService } from '../../core/auth/session.service';
-import { DateTimePipe } from '../../shared/date-time.pipe';
+import { OrderSummaryCard } from './order-summary.component';
 import { MoneyPipe } from '../../shared/money.pipe';
-import { PageHeader } from '../../shared/page-header.component';
-import { StatusBadge } from '../../shared/status-badge.component';
+import { Icon } from '../../shared/icon.component';
 
 @Component({
   selector: 'app-order-detail-page',
-  imports: [
-    FocusOnShow,
-    LoadingState,
-    RouterLink,
-    ReactiveFormsModule,
-    MatButton,
-    MatCheckbox,
-    DateTimePipe,
-    MoneyPipe,
-    PageHeader,
-    StatusBadge,
-  ],
+  host: { '(window:pageshow)': 'resumeAfterBack()' },
+  imports: [FocusOnShow, LoadingState, RouterLink, MatButton, MoneyPipe, Icon, OrderSummaryCard],
   templateUrl: './order-detail-page.component.html',
-  
-  styles: `
-    :host {
-      display: block;
-      padding-top: 32px;
-    }
-    .panel {
-      overflow-wrap: anywhere;
-    }
-    .order-heading {
-      display: flex;
-      gap: 16px;
-      justify-content: space-between;
-      flex-wrap: wrap;
-    }
-    .order-heading h2 {
-      font-size: 1.1rem;
-    }
-    .countdown {
-      padding: 12px 16px;
-      border: 1px solid var(--app-warning-line);
-      border-radius: 0.4rem;
-      background: var(--app-warning-soft);
-      color: var(--app-warning);
-      font-size: 1.1rem;
-      font-variant-numeric: tabular-nums;
-    }
-    .payment-success {
-      border-top: 4px solid var(--app-success);
-      background: linear-gradient(var(--app-success-soft), var(--app-panel) 180px);
-    }
-    .payment-success h2 {
-      color: var(--app-success);
-    }
-    .items {
-      border-top: 1px solid var(--app-line);
-    }
-    .item-row {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto auto;
-      gap: 24px;
-      padding: 20px 0;
-      border-bottom: 1px solid var(--app-line);
-    }
-    .totals {
-      max-width: 440px;
-      margin: 24px 0 0 auto;
-    }
-    .totals > div {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 8px 0;
-    }
-    .totals dd {
-      margin: 0;
-    }
-    .grand-total {
-      font-weight: 700;
-      font-size: 1.2rem;
-    }
-    @media (max-width: 768px) {
-      .item-row {
-        grid-template-columns: 1fr;
-        gap: 8px;
-      }
-    }
-  `,
+
+  styleUrl: './order-detail-page.component.scss',
 })
 export class OrderDetailPage {
+  private readonly paymentNavigation = inject(PaymentNavigation);
   private readonly feedback = inject(FeedbackService);
   private readonly api = inject(OrderApi);
   private readonly route = inject(ActivatedRoute);
@@ -121,7 +53,22 @@ export class OrderDetailPage {
   protected readonly authRequired = signal(false);
   protected readonly needsRefresh = signal(false);
   protected readonly confirmCancel = signal(false);
-  protected readonly simulateFailure = new FormControl(false, { nonNullable: true });
+  protected readonly checkout = signal<PayOSCheckout | null>(null);
+  protected readonly redirecting = signal(false);
+  protected readonly paymentPage = signal(false);
+  protected readonly noOrderSelected = signal(false);
+  protected readonly paymentReturn = signal(false);
+  protected readonly paymentCancelled = signal(false);
+  protected readonly checkingPayment = signal(false);
+  protected readonly loginReturnUrl = computed(() =>
+    this.paymentReturn()
+      ? `/payment/${this.paymentCancelled() ? 'cancel' : 'success'}?orderCode=${this.id()}`
+      : this.paymentPage()
+        ? `/payment?orderCode=${this.id()}`
+        : `/orders/${this.id()}`,
+  );
+  private syncAttempts = 0;
+  private nextSyncAt = 0;
   private readonly now = signal(Date.now());
   private readonly serverExpired = signal(false);
   protected readonly remaining = computed(() => {
@@ -142,18 +89,52 @@ export class OrderDetailPage {
       !this.expired() &&
       !this.busy() &&
       !this.refreshing() &&
+      !this.redirecting() &&
+      !this.checkingPayment() &&
       !this.needsRefresh() &&
       !this.authRequired(),
   );
 
+  protected readonly ticketCount = computed(
+    () => this.order()?.items.reduce((total, item) => total + item.quantity, 0) ?? 0,
+  );
+  protected readonly canRefresh = computed(
+    () => !this.busy() && !this.refreshing() && !this.redirecting() && !this.checkingPayment(),
+  );
+  protected readonly payLabel = computed(() =>
+    this.redirecting()
+      ? 'Đang chuyển đến PayOS…'
+      : this.actionName() === 'pay'
+        ? 'Đang tạo liên kết…'
+        : this.checkout()
+          ? 'Mở lại trang PayOS'
+          : this.paymentCancelled()
+            ? 'Tiếp tục thanh toán'
+            : 'Thanh toán qua PayOS',
+  );
+
   constructor() {
-    this.route.paramMap
+    combineLatest([this.route.paramMap, this.route.queryParamMap, this.route.data])
       .pipe(
-        map((params) => params.get('id')),
-        distinctUntilChanged(),
+        map(([params, query, data]) => ({
+          id:
+            data['paymentReturn'] || data['paymentPage']
+              ? query.get('orderCode')
+              : params.get('id'),
+          paymentPage: !!data['paymentPage'],
+          paymentReturn: !!data['paymentReturn'],
+          paymentCancelled: !!data['paymentCancelled'],
+        })),
+        distinctUntilChanged(
+          (a, b) =>
+            a.id === b.id &&
+            a.paymentPage === b.paymentPage &&
+            a.paymentReturn === b.paymentReturn &&
+            a.paymentCancelled === b.paymentCancelled,
+        ),
         takeUntilDestroyed(),
       )
-      .subscribe((id) => {
+      .subscribe(({ id, paymentPage, paymentReturn, paymentCancelled }) => {
         this.actionRequest?.unsubscribe();
         this.readRequest?.unsubscribe();
         this.order.set(null);
@@ -164,7 +145,21 @@ export class OrderDetailPage {
         this.confirmCancel.set(false);
         this.needsRefresh.set(false);
         this.deadlineChecked = '';
-        this.simulateFailure.setValue(false);
+        this.checkout.set(null);
+        this.redirecting.set(false);
+        this.paymentPage.set(paymentPage);
+        this.noOrderSelected.set(false);
+        this.paymentReturn.set(paymentReturn);
+        this.paymentCancelled.set(paymentCancelled);
+        this.checkingPayment.set(false);
+        this.syncAttempts = 0;
+        this.nextSyncAt = 0;
+        if (id === null && paymentPage) {
+          this.id.set(null);
+          this.loading.set(false);
+          this.noOrderSelected.set(true);
+          return;
+        }
         if (!id || !/^[1-9]\d*$/.test(id) || !Number.isSafeInteger(Number(id))) {
           this.id.set(null);
           this.loading.set(false);
@@ -172,7 +167,8 @@ export class OrderDetailPage {
           return;
         }
         this.id.set(Number(id));
-        this.load();
+        this.checkingPayment.set(paymentReturn);
+        this.load(false, paymentReturn);
       });
     interval(1000)
       .pipe(takeUntilDestroyed())
@@ -180,11 +176,24 @@ export class OrderDetailPage {
         this.now.set(Date.now());
         const order = this.order();
         if (
+          this.checkingPayment() &&
+          order?.status === 'PENDING' &&
+          !this.busy() &&
+          !this.refreshing() &&
+          this.now() >= this.nextSyncAt
+        ) {
+          this.load(true, true);
+          return;
+        }
+        if (
           !order ||
           order.status !== 'PENDING' ||
           !this.expired() ||
           this.busy() ||
-          this.refreshing()
+          this.refreshing() ||
+          this.redirecting() ||
+          this.authRequired() ||
+          this.needsRefresh()
         )
           return;
         const key = `${order.id}:${order.expiresAt}`;
@@ -194,15 +203,18 @@ export class OrderDetailPage {
       });
   }
 
-  protected load(preserveError = false): void {
+  protected load(
+    preserveError = false,
+    reconcile = this.paymentReturn() || this.order()?.status === 'PENDING',
+  ): void {
     const id = this.id();
     if (!id || this.busy()) return;
     this.readRequest?.unsubscribe();
     if (!preserveError) this.error.set('');
     this.loading.set(!this.order());
     this.refreshing.set(true);
-    this.readRequest = this.api
-      .getOwn(id)
+    const request = reconcile ? this.api.syncPayOS(id) : this.api.getOwn(id);
+    this.readRequest = request
       .pipe(
         finalize(() => {
           this.loading.set(false);
@@ -216,8 +228,21 @@ export class OrderDetailPage {
           this.now.set(Date.now());
           this.needsRefresh.set(false);
           this.authRequired.set(false);
+          if (reconcile) {
+            this.syncAttempts++;
+            this.nextSyncAt = Date.now() + 3000;
+            this.checkingPayment.set(
+              this.paymentReturn() &&
+                !this.paymentCancelled() &&
+                order.status === 'PENDING' &&
+                !this.expired() &&
+                this.syncAttempts < 10,
+            );
+          }
+          if (order.status !== 'PENDING') this.checkingPayment.set(false);
         },
         error: (error: unknown) => {
+          this.checkingPayment.set(false);
           this.error.set(
             this.feedback.problem(
               error,
@@ -231,27 +256,80 @@ export class OrderDetailPage {
   }
 
   protected pay(): void {
-    this.act('pay');
-  }
-  protected cancel(): void {
-    if (this.confirmCancel()) this.act('cancel');
-  }
-
-  private act(action: 'pay' | 'cancel'): void {
     const order = this.order();
     if (!order || !this.canPay()) return;
+    const checkout = this.checkout();
+    if (checkout) {
+      this.openCheckout(checkout);
+      return;
+    }
     this.busy.set(true);
-    this.actionName.set(action);
+    this.actionName.set('pay');
     this.error.set('');
     this.notice.set('');
     this.confirmCancel.set(false);
-    // Chỉ gửi một POST. Nếu lỗi, đọc lại trạng thái bằng GET, không tự replay thao tác ghi.
-    const request =
-      action === 'pay'
-        ? this.api.pay(order.id, { method: 'MOCK', simulateFailure: this.simulateFailure.value })
-        : this.api.cancel(order.id);
-    this.actionRequest = request
+    // Không retry POST: backend có thể hủy liên kết cũ khi tạo lại checkout.
+    this.actionRequest = this.api
+      .createPayOSCheckout(order.id)
       .pipe(
+        finalize(() => {
+          this.busy.set(false);
+          this.actionName.set(null);
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (checkout) => {
+          if (checkout.orderId !== order.id || checkout.orderCode !== order.id) {
+            this.actionError(new Error('Checkout order mismatch'));
+            return;
+          }
+          if (['PAID', 'CANCELLED', 'EXPIRED', 'FAILED'].includes(checkout.status)) {
+            this.busy.set(false);
+            this.notice.set(
+              'Liên kết PayOS không còn chờ thanh toán. Đang cập nhật trạng thái đơn.',
+            );
+            this.load();
+            return;
+          }
+          this.checkout.set(checkout);
+          this.openCheckout(checkout);
+        },
+        error: (error: unknown) => this.actionError(error),
+      });
+  }
+
+  private openCheckout(checkout: PayOSCheckout): void {
+    try {
+      this.error.set('');
+      this.redirecting.set(true);
+      this.paymentNavigation.openCheckout(checkout.checkoutUrl);
+    } catch {
+      this.redirecting.set(false);
+      this.error.set('Không thể mở trang PayOS. Vui lòng thử mở lại liên kết thanh toán.');
+    }
+  }
+
+  protected resumeAfterBack(): void {
+    if (!this.redirecting()) return;
+    this.redirecting.set(false);
+    this.load();
+  }
+  protected cancel(): void {
+    const order = this.order();
+    if (!order || !this.canPay() || !this.confirmCancel()) return;
+    this.busy.set(true);
+    this.actionName.set('cancel');
+    this.error.set('');
+    this.notice.set('');
+    this.confirmCancel.set(false);
+    // Đối soát trước khi hủy, tránh hủy đơn đã thanh toán nhưng webhook chưa về.
+    this.actionRequest = this.api
+      .syncPayOS(order.id)
+      .pipe(
+        switchMap((current) =>
+          current.status === 'PENDING' ? this.api.cancel(order.id) : of(current),
+        ),
         finalize(() => {
           this.busy.set(false);
           this.actionName.set(null);
@@ -273,25 +351,28 @@ export class OrderDetailPage {
             this.feedback.success(this.notice());
           else this.feedback.info(this.notice());
         },
-        error: (error: unknown) => {
-          this.busy.set(false);
-          this.error.set(
-            this.feedback.problem(
-              error,
-              'Chưa xác nhận được kết quả thao tác. Vui lòng cập nhật đơn trước khi thử lại.',
-            ).message,
-          );
-          this.needsRefresh.set(true);
-          if (error instanceof HttpErrorResponse && error.status === 401) {
-            this.authRequired.set(true);
-            return;
-          }
-          if (error instanceof HttpErrorResponse && error.error?.code === 'ORDER_EXPIRED')
-            this.serverExpired.set(true);
-          // Với lỗi mạng/5xx, để người dùng chủ động đối soát, tránh tự khuyến khích thanh toán lại.
-          if (error instanceof HttpErrorResponse && error.status > 0 && error.status < 500)
-            this.load(true);
-        },
+        error: (error: unknown) => this.actionError(error),
       });
+  }
+
+  private actionError(error: unknown): void {
+    this.busy.set(false);
+    this.checkingPayment.set(false);
+    this.error.set(
+      this.feedback.problem(
+        error,
+        'Chưa xác nhận được kết quả thao tác. Vui lòng cập nhật đơn trước khi thử lại.',
+      ).message,
+    );
+    this.needsRefresh.set(true);
+    if (error instanceof HttpErrorResponse && error.status === 401) {
+      this.authRequired.set(true);
+      return;
+    }
+    if (error instanceof HttpErrorResponse && error.error?.code === 'ORDER_EXPIRED')
+      this.serverExpired.set(true);
+    // Không tự tạo lại checkout sau lỗi mạng/5xx hoặc timeout.
+    if (error instanceof HttpErrorResponse && error.status > 0 && error.status < 500)
+      this.load(true);
   }
 }

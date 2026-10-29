@@ -416,7 +416,7 @@ export class BookingPage {
         next: (order) => {
           this.feedback.success('Đã tạo đơn và giữ chỗ. Vui lòng thanh toán trước thời hạn.');
           this.uncertain.set(true); // Không tạo lại đơn kể cả khi điều hướng chưa kết thúc.
-          void this.router.navigate(['/orders', order.id]);
+          void this.router.navigate(['/payment'], { queryParams: { orderCode: order.id } });
         },
         error: (error: unknown) => {
           this.error.set(

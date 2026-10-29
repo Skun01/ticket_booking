@@ -42,6 +42,30 @@ export const routes: Routes = [
         loadComponent: () => import('./features/orders/orders-page.component').then((m) => m.OrdersPage),
       },
       {
+        path: 'payment',
+        canActivate: [customerGuard],
+        title: 'Thanh toán · Fullstack Starter',
+        data: { paymentPage: true },
+        loadComponent: () =>
+          import('./features/orders/order-detail-page.component').then((m) => m.OrderDetailPage),
+      },
+      {
+        path: 'payment/success',
+        canActivate: [customerGuard],
+        title: 'Kết quả thanh toán · Fullstack Starter',
+        data: { paymentReturn: true },
+        loadComponent: () =>
+          import('./features/orders/order-detail-page.component').then((m) => m.OrderDetailPage),
+      },
+      {
+        path: 'payment/cancel',
+        canActivate: [customerGuard],
+        title: 'Quay lại từ PayOS · Fullstack Starter',
+        data: { paymentReturn: true, paymentCancelled: true },
+        loadComponent: () =>
+          import('./features/orders/order-detail-page.component').then((m) => m.OrderDetailPage),
+      },
+      {
         path: 'orders/:id',
         canActivate: [customerGuard],
         title: 'Chi tiết đơn vé · Fullstack Starter',

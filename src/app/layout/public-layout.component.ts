@@ -34,7 +34,7 @@ export class PublicLayout {
     effect(() => {
       if (this.session.loading() || this.loggingOut() || this.session.isAuthenticated()) return;
       if (
-        /^\/(?:orders(?:\/[1-9]\d*)?|tickets|events\/[1-9]\d*\/book)(?:\?|$)/.test(this.router.url)
+        /^\/(?:orders(?:\/[1-9]\d*)?|payment(?:\/(?:success|cancel))?|tickets|events\/[1-9]\d*\/book)(?:\?|$)/.test(this.router.url)
       ) {
         void this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
       }

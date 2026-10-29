@@ -16,6 +16,11 @@ const paths: Record<string, string> = {
   login: 'M14 3h7v18h-7 M3 12h13 M10 6l6 6-6 6',
   logout: 'M10 3H3v18h7 M10 12h11 M15 6l6 6-6 6',
   check: 'M4 12l5 5L20 6',
+  clock: 'M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0 M12 6v6l4 2',
+  ticket: 'M3 4h18v5a3 3 0 0 0 0 6v5H3v-5a3 3 0 0 0 0-6z M15 4v3 M15 11v2 M15 17v3',
+  qr: 'M3 3h6v6H3z M15 3h6v6h-6z M3 15h6v6H3z M15 15h2v2h-2z M21 15v6h-6 M12 3v3 M3 12h6 M12 12h5 M12 18v3',
+  shield: 'M12 2l8 3v7c0 5-8 10-8 10S4 17 4 12V5z M8 12l3 3 5-6',
+  refresh: 'M20 7V3l-4 4 M20 7A9 9 0 1 0 21 15 M16 7h4',
 };
 
 @Component({
