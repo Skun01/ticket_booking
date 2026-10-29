@@ -1,0 +1,93 @@
+    @if (loading()) {
+      <app-loading-state label="Đang tải chi tiết sự kiện…" />
+    } @else if (error()) {
+      <p class="form-notice error" role="alert">{{ error() }}</p>
+      <a routerLink="/events" class="text-link"><app-icon name="left" /> Về danh sách sự kiện</a>
+    } @else if (event(); as ev) {
+      <a routerLink="/events" class="text-link back"><app-icon name="left" /> Tất cả sự kiện</a>
+
+      <div class="detail-banner" [style.background-image]="bannerStyle(ev)">
+        @if (!ev.bannerUrl) {
+          <app-icon name="calendar" />
+        }
+      </div>
+
+      <div class="detail-grid">
+        <section class="detail-main" aria-labelledby="event-title">
+          <span class="event-cat">{{ ev.category.name }}</span>
+          <h1 id="event-title">{{ ev.title }}</h1>
+          <div class="event-schedule">
+            <section class="schedule-block" aria-labelledby="event-time-title">
+              <h2 id="event-time-title"><app-icon name="calendar" /> Thời gian diễn ra</h2>
+              <dl>
+                <div><dt>Bắt đầu </dt><dd>{{ ev.startTime | dateTime }}</dd></div>
+                <div><dt>Kết thúc </dt><dd>{{ ev.endTime | dateTime }}</dd></div>
+              </dl>
+            </section>
+            <section class="schedule-block" aria-labelledby="sales-time-title">
+              <h2 id="sales-time-title"><app-icon name="calendar" /> Thời gian mở bán</h2>
+              <dl>
+                <div><dt>Mở bán </dt><dd>{{ ev.salesStartTime | dateTime }}</dd></div>
+                <div><dt>Đóng bán </dt><dd>{{ ev.startTime | dateTime }}</dd></div>
+              </dl>
+              <p class="schedule-note">Đóng bán khi sự kiện bắt đầu.</p>
+            </section>
+          </div>
+          <p class="timezone">Thời gian hiển thị theo giờ Việt Nam (UTC+7).</p>
+          <p class="detail-meta">
+            <app-icon name="compass" />
+            <span>{{ ev.venue.name }} · {{ ev.venue.address }}, {{ ev.venue.city }}</span>
+          </p>
+        </section>
+
+        <aside class="purchase-panel" aria-labelledby="purchase-title">
+          <h2 id="purchase-title">Vé sự kiện</h2>
+          <app-event-sales-status [event]="ev" [now]="now()" />
+          @if (soldOut()) {
+            <p class="stock-notice">Hết vé</p>
+          }
+          @if (minimumPrice() !== null) {
+            <div class="purchase-price">
+              <span>Giá vé từ </span>
+              <strong>{{ minimumPrice() | money }}</strong>
+            </div>
+          }
+          <div class="purchase-date">
+            <span>Mở bán lúc </span>
+            <strong>{{ ev.salesStartTime | dateTime }}</strong>
+          </div>
+          <button
+            mat-flat-button
+            type="button"
+            class="buy-button"
+            [disabled]="
+              !!purchaseReason() ||
+              session.loading() ||
+              (session.isAuthenticated() && !session.isCustomer())
+            "
+            aria-describedby="purchase-help"
+            (click)="book()"
+          >
+            <app-icon name="right" /> Mua vé
+          </button>
+          <p id="purchase-help" class="purchase-help">
+            @if (session.loading()) {
+              Đang kiểm tra tài khoản…
+            } @else if (session.isAuthenticated() && !session.isCustomer()) {
+              Chỉ tài khoản khách hàng (CUSTOMER) được đặt vé.
+            } @else if (purchaseReason()) {
+              {{ purchaseReason() }}
+            } @else {
+              Chọn hạng vé và số lượng ở bước tiếp theo.
+            }
+          </p>
+        </aside>
+
+        @if (ev.description) {
+          <section class="detail-description" aria-labelledby="description-title">
+            <h2 id="description-title">Về sự kiện</h2>
+            <div class="detail-desc">{{ ev.description }}</div>
+          </section>
+        }
+      </div>
+    }

@@ -7,7 +7,14 @@ import { authInterceptor } from './auth.interceptor';
 import { CurrentUser, SessionService } from './session.service';
 
 const base = 'http://localhost:8080/api';
-const admin: CurrentUser = { id: 1, email: 'admin@example.test', fullName: 'Quản trị', role: 'ADMIN' };
+const admin: CurrentUser = {
+  id: 1,
+  email: 'admin@example.test',
+  fullName: 'Quản trị',
+  phone: null,
+  role: 'ADMIN',
+  status: 'ACTIVE',
+};
 const token = (value: string) => ({ accessToken: value, tokenType: 'Bearer', expiresIn: 900 });
 const settle = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 

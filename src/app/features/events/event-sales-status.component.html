@@ -1,0 +1,26 @@
+    <span
+      class="badge"
+      [class.phase-upcoming]="state().phase === 'upcoming'"
+      [class.phase-on-sale]="state().phase === 'on-sale'"
+      [class.phase-ongoing]="state().phase === 'ongoing'"
+      [class.phase-ended]="state().phase === 'ended'"
+      [class.phase-invalid]="state().phase === 'invalid'"
+    >
+      <span class="dot" aria-hidden="true"></span>
+      <span class="copy">
+        <strong>{{ state().label }}</strong>
+        @switch (state().phase) {
+          @case ('upcoming') {
+            <small
+              >Mở bán sau <span class="countdown">{{ state().countdown }}</span></small
+            >
+          }
+          @case ('ongoing') {
+            <small>Đã đóng bán</small>
+          }
+          @case ('invalid') {
+            <small>Thời gian mở bán hoặc diễn ra chưa hợp lệ.</small>
+          }
+        }
+      </span>
+    </span>

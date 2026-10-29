@@ -1,0 +1,53 @@
+    <a appSkipLink class="skip-link" href="#main-content">Đến nội dung chính</a>
+    <header class="site-header">
+      <a class="brand" routerLink="/" aria-label="Trang chủ">
+        <span class="brand-icon"><app-icon name="grid" /></span> Fullstack App
+      </a>
+      <nav aria-label="Điều hướng chính">
+        <a
+          routerLink="/"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+          [routerLinkActiveOptions]="{ exact: true }"
+          >Trang chủ</a
+        >
+        <a routerLink="/events" routerLinkActive="active" ariaCurrentWhenActive="page">Sự kiện</a>
+        @if (session.isCustomer()) {
+          <a routerLink="/orders" routerLinkActive="active" ariaCurrentWhenActive="page"
+            >Đơn của tôi</a
+          >
+          <a routerLink="/tickets" routerLinkActive="active" ariaCurrentWhenActive="page"
+            >Vé của tôi</a
+          >
+        }
+        @if (session.isOrganizer()) {
+          <a routerLink="/organizer" routerLinkActive="active" ariaCurrentWhenActive="page"
+            >Kênh tổ chức</a
+          >
+        }
+        @if (session.isAdmin()) {
+          <a routerLink="/admin" routerLinkActive="active" ariaCurrentWhenActive="page"
+            >Khu vực quản trị</a
+          >
+        }
+      </nav>
+      <div class="header-actions">
+        @if (session.loading()) {
+          <span class="muted">Đang tải…</span>
+        } @else if (session.user(); as user) {
+          <div class="user-menu">
+            <span class="header-action"> <app-icon name="user" /> {{ user.fullName }} </span>
+            <button mat-button type="button" (click)="logout()" [disabled]="loggingOut()">
+              <app-icon name="logout" /> {{ loggingOut() ? 'Đang thoát…' : 'Đăng xuất' }}
+            </button>
+          </div>
+        } @else {
+          <a class="header-action" routerLink="/login"> <app-icon name="login" /> Đăng nhập </a>
+        }
+      </div>
+    </header>
+    <main id="main-content" class="page-container" tabindex="-1"><router-outlet /></main>
+    <footer class="site-footer">
+      <span>Fullstack Starter</span>
+      <span>Spring Boot 4.1 · Angular 22</span>
+    </footer>

@@ -1,0 +1,18 @@
+    @if (totalPages() > 1) {
+      <nav class="paginator" aria-label="Phân trang">
+        <button mat-stroked-button type="button" [disabled]="page() <= 0" (click)="go(page() - 1)">
+          <app-icon name="left" /> Trước
+        </button>
+        <span class="page-info" aria-live="polite" aria-atomic="true"
+          >Trang {{ page() + 1 }} / {{ totalPages() }}</span
+        >
+        <button
+          mat-stroked-button
+          type="button"
+          [disabled]="page() >= totalPages() - 1"
+          (click)="go(page() + 1)"
+        >
+          Sau <app-icon name="right" />
+        </button>
+      </nav>
+    }

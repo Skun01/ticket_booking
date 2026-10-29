@@ -1,0 +1,54 @@
+    <app-page-header
+      title="Đơn của tôi"
+      subtitle="Theo dõi giữ chỗ, thanh toán và các đơn vé đã đặt."
+    >
+      <a mat-stroked-button routerLink="/events">Khám phá sự kiện</a>
+    </app-page-header>
+    <mat-form-field appearance="outline">
+      <mat-label>Lọc trạng thái trên trang này</mat-label>
+      <mat-select [formControl]="status" (selectionChange)="filter.set(status.value)">
+        <mat-option value="">Tất cả</mat-option>
+        <mat-option value="PENDING">Chờ thanh toán</mat-option>
+        <mat-option value="PAID">Đã thanh toán</mat-option>
+        <mat-option value="CANCELLED">Đã hủy</mat-option>
+        <mat-option value="EXPIRED">Hết hạn</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <p class="muted">Bộ lọc áp dụng cho các đơn trên trang hiện tại, không phải toàn bộ lịch sử.</p>
+    @if (loading()) {
+      <app-loading-state label="Đang tải đơn vé…" />
+    } @else if (error()) {
+      <p class="form-notice error" role="alert">{{ error() }}</p>
+      <button mat-stroked-button (click)="load(page())" type="button">Thử lại</button>
+    } @else {
+      <p class="muted">Tổng cộng {{ total() }} đơn</p>
+      @if (visible().length === 0) {
+        <app-empty-state
+          icon="list"
+          title="Không có đơn vé phù hợp"
+          description="Nếu bạn đã đặt vé, thử bỏ bộ lọc hoặc xem trang khác."
+        />
+      } @else {
+        <div class="order-list">
+          @for (order of visible(); track order.id) {
+            <article class="order-row">
+              <div>
+                <h2>
+                  <a [routerLink]="['/orders', order.id]">{{ order.orderCode }}</a>
+                </h2>
+                <p class="muted">Đặt lúc {{ order.createdAt | dateTime }}</p>
+                @if (order.status === 'PENDING' && order.expiresAt) {
+                  <p class="muted">Giữ chỗ đến {{ order.expiresAt | dateTime }}</p>
+                }
+              </div>
+              <div class="order-summary">
+                <app-status-badge [status]="order.status" />
+                <strong>{{ order.totalAmount | money }}</strong>
+                <a mat-stroked-button [routerLink]="['/orders', order.id]">Xem đơn</a>
+              </div>
+            </article>
+          }
+        </div>
+      }
+      <app-paginator [page]="page()" [totalPages]="totalPages()" (pageChange)="load($event)" />
+    }

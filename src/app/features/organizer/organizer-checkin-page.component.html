@@ -1,0 +1,122 @@
+    <app-page-header
+      title="Check-in vé"
+      subtitle="Nhập mã vé để xác nhận khách vào sự kiện của bạn."
+    >
+      <a mat-stroked-button routerLink="/organizer">Sự kiện của tôi</a>
+    </app-page-header>
+    <section class="panel entry-panel" aria-labelledby="entry-title">
+      <h2 id="entry-title">Nhập mã vé</h2>
+      <p id="ticket-code-help" class="muted">
+        Dùng mã trên vé điện tử, tối đa 40 ký tự. Nhấn Enter hoặc nút Check-in để gửi. Mã được kiểm
+        tra đúng như đã nhập, chỉ bỏ khoảng trắng hai đầu.
+      </p>
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <mat-form-field appearance="outline" class="code-field">
+          <mat-label>Mã vé</mat-label>
+          <input
+            #ticketCodeInput
+            matInput
+            type="text"
+            formControlName="ticketCode"
+            autocomplete="off"
+            autocapitalize="off"
+            autocorrect="off"
+            spellcheck="false"
+            [readonly]="busy() || !!uncertainCode()"
+            (input)="clearResult()"
+            aria-describedby="ticket-code-help"
+            [attr.aria-invalid]="!!error()"
+          />
+        </mat-form-field>
+        <button
+          mat-flat-button
+          type="submit"
+          [disabled]="busy() || !!uncertainCode() || !session.isOrganizer()"
+          [attr.aria-busy]="busy()"
+        >
+          {{ busy() ? 'Đang check-in…' : 'Check-in' }}
+        </button>
+      </form>
+      @if (busy()) {
+        <p role="status">
+          Đang xác nhận mã {{ submittedCode() }}. Không gửi lại hoặc cho khách qua cổng khi chưa có
+          kết quả.
+        </p>
+      }
+      @if (error()) {
+        <div class="form-notice error" role="alert">
+          <h3>Chưa xác nhận check-in</h3>
+          @if (submittedCode()) {
+            <p class="code">Mã vừa gửi: {{ submittedCode() }}</p>
+          }
+          <p>{{ error() }}</p>
+          <p>Không sử dụng kết quả check-in trước đó cho mã vé này.</p>
+        </div>
+      }
+      @if (uncertainCode(); as code) {
+        <div class="form-notice warning" role="alert">
+          <h3>Chưa rõ kết quả xử lý</h3>
+          <p class="code">Mã cần đối soát: {{ code }}</p>
+          <p>
+            Yêu cầu có thể đã được máy chủ xử lý dù chưa nhận được phản hồi. Không tự xác nhận khách
+            đã check-in.
+          </p>
+          <p>
+            Nếu gửi lại và nhận “vé đã dùng”, cần đối soát tại cổng; phản hồi đó không chứng minh
+            lần gửi trước của bạn đã thành công.
+          </p>
+          <div class="form-actions">
+            <button mat-stroked-button type="button" (click)="retryUncertain()" [disabled]="busy()">
+              Gửi lại để xác minh
+            </button>
+            <button mat-stroked-button type="button" (click)="nextTicket()" [disabled]="busy()">
+              Nhập mã khác
+            </button>
+          </div>
+        </div>
+      }
+    </section>
+    @if (ticket(); as ticket) {
+      <section
+        class="panel result-panel"
+        aria-labelledby="checkin-result-title"
+        role="status"
+        aria-live="polite"
+      >
+        <h2 id="checkin-result-title">Check-in thành công</h2>
+        <p>
+          Máy chủ đã xác nhận vé được sử dụng. Kiểm tra tên sự kiện trước khi cho khách qua cổng.
+        </p>
+        <app-status-badge [status]="ticket.status" />
+        <dl>
+          <div>
+            <dt>Mã vé</dt>
+            <dd class="code">{{ ticket.ticketCode }}</dd>
+          </div>
+          <div>
+            <dt>Sự kiện</dt>
+            <dd>{{ ticket.eventTitle }}</dd>
+          </div>
+          <div>
+            <dt>Hạng vé</dt>
+            <dd>{{ ticket.ticketTypeName }}</dd>
+          </div>
+          <div>
+            <dt>Thời gian sự kiện</dt>
+            <dd>{{ ticket.startTime | dateTime }} đến {{ ticket.endTime | dateTime }}</dd>
+          </div>
+          <div>
+            <dt>Check-in lúc</dt>
+            <dd>{{ ticket.checkedInAt | dateTime }} (giờ Việt Nam)</dd>
+          </div>
+        </dl>
+        <div class="form-actions">
+          <button mat-flat-button type="button" (click)="nextTicket()">Nhập vé tiếp theo</button>
+          <a mat-stroked-button [routerLink]="['/organizer/events', ticket.eventId]">Xem sự kiện</a>
+        </div>
+      </section>
+    } @else if (!error() && !busy() && !uncertainCode()) {
+      <p class="muted ready" role="status">
+        Sẵn sàng nhận mã vé. Chỉ kết quả được máy chủ xác nhận mới được hiển thị là thành công.
+      </p>
+    }

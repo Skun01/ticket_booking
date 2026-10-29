@@ -1,0 +1,164 @@
+    <app-page-header
+      eyebrow="KHÁM PHÁ"
+      title="Sự kiện"
+      subtitle="Tìm và đặt vé cho các sự kiện sắp diễn ra."
+    />
+
+    @if (categoryError()) {
+      <p class="form-notice warning" role="status">{{ categoryError() }}</p>
+    }
+
+    <form class="search-shell" [formGroup]="filterForm" (ngSubmit)="applyNow()">
+      <div class="search-row">
+        <div class="search-field">
+          <app-icon name="search" />
+          <input
+            type="search"
+            formControlName="keyword"
+            maxlength="200"
+            placeholder="Tìm sự kiện theo tên hoặc mô tả…"
+            aria-label="Tìm kiếm sự kiện"
+            enterkeyhint="search"
+          />
+          @if (filterForm.controls.keyword.value) {
+            <button
+              type="button"
+              class="search-clear"
+              (click)="clearKeyword()"
+              aria-label="Xóa từ khóa"
+            >
+              ×
+            </button>
+          }
+        </div>
+        <button
+          type="button"
+          class="filter-toggle"
+          [class.is-active]="filtersOpen()"
+          (click)="toggleFilters()"
+          [attr.aria-expanded]="filtersOpen()"
+          aria-controls="advanced-filters"
+        >
+          <app-icon name="list" />
+          <span>Bộ lọc</span>
+          @if (advancedCount() > 0) {
+            <span class="filter-count">{{ advancedCount() }}</span>
+          }
+        </button>
+      </div>
+
+      @if (filtersOpen()) {
+        <div class="advanced-filters" id="advanced-filters">
+          <p id="event-filter-time-help" class="muted time-help">
+            Thời gian lọc nhập theo giờ Việt Nam (UTC+7).
+          </p>
+          <div class="filter-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Danh mục</mat-label>
+              <mat-select formControlName="categoryId">
+                <mat-option [value]="null">Tất cả danh mục</mat-option>
+                @for (c of categories(); track c.id) {
+                  <mat-option [value]="c.id">{{ c.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Thành phố</mat-label>
+              <input matInput formControlName="city" maxlength="100" placeholder="VD: Hà Nội" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Từ ngày</mat-label>
+              <input
+                matInput
+                type="datetime-local"
+                formControlName="from"
+                aria-describedby="event-filter-time-help"
+              />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Đến ngày</mat-label>
+              <input
+                matInput
+                type="datetime-local"
+                formControlName="to"
+                aria-describedby="event-filter-time-help"
+              />
+            </mat-form-field>
+          </div>
+        </div>
+      }
+    </form>
+
+    @if (filterError()) {
+      <p class="form-notice error" role="alert">{{ filterError() }}</p>
+    }
+
+    <div class="result-bar" role="status">
+      @if (chips().length > 0) {
+        <ul class="chip-list" aria-label="Bộ lọc đang áp dụng">
+          @for (chip of chips(); track chip.key) {
+            <li>
+              <button type="button" class="chip" (click)="removeChip(chip.key)">
+                <span>{{ chip.label }}</span>
+                <span class="chip-x" aria-hidden="true">×</span>
+                <span class="sr-only">Gỡ bộ lọc</span>
+              </button>
+            </li>
+          }
+          <li>
+            <button type="button" class="chip chip-reset" (click)="resetFilter()">
+              Xóa tất cả
+            </button>
+          </li>
+        </ul>
+      }
+      @if (!loading() && !error()) {
+        <span class="result-count">{{ resultSummary() }}</span>
+      }
+    </div>
+
+    @if (loading()) {
+      <app-loading-state label="Đang tải sự kiện…" />
+    } @else if (error()) {
+      <p class="form-notice error" role="alert">{{ error() }}</p>
+      <button mat-stroked-button type="button" (click)="load()">Thử lại</button>
+    } @else if (events().length === 0) {
+      <app-empty-state
+        icon="calendar"
+        title="Không tìm thấy sự kiện"
+        [description]="
+          chips().length > 0
+            ? 'Không có sự kiện khớp bộ lọc hiện tại. Thử xóa bớt tiêu chí hoặc đổi từ khóa.'
+            : 'Hiện chưa có sự kiện nào được công bố. Vui lòng quay lại sau.'
+        "
+      >
+        @if (chips().length > 0) {
+          <button mat-flat-button type="button" (click)="resetFilter()">Xóa bộ lọc</button>
+        }
+      </app-empty-state>
+    } @else {
+      <div class="event-grid">
+        @for (ev of events(); track ev.id) {
+          <a class="event-card" [routerLink]="['/events', ev.id]">
+            <div class="event-banner" [style.background-image]="bannerStyle(ev)">
+              @if (!ev.bannerUrl) {
+                <app-icon name="calendar" />
+              }
+            </div>
+            <div class="event-body">
+              <span class="event-cat">{{ ev.category.name }}</span>
+              <h3>{{ ev.title }}</h3>
+              <app-event-sales-status [event]="ev" [now]="now()" />
+              <dl class="card-dates">
+                <div><dt>Diễn ra</dt><dd>{{ ev.startTime | dateTime }}</dd></div>
+                <div><dt>Mở bán</dt><dd>{{ ev.salesStartTime | dateTime }}</dd></div>
+              </dl>
+              <p class="event-meta">
+                <app-icon name="compass" /> {{ ev.venue.name }}, {{ ev.venue.city }}
+              </p>
+            </div>
+          </a>
+        }
+      </div>
+      <app-paginator [page]="page()" [totalPages]="totalPages()" (pageChange)="goTo($event)" />
+    }

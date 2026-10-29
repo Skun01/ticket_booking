@@ -1,0 +1,58 @@
+    <section class="intro-section">
+      <p class="eyebrow">NỀN TẢNG BÁN VÉ SỰ KIỆN</p>
+      <h1>Khám phá & đặt vé<br />cho những sự kiện đáng nhớ</h1>
+      <p class="lead">
+        Tìm sự kiện theo sở thích, xem hạng vé và lên lịch cho trải nghiệm tiếp theo.
+      </p>
+      <div class="hero-actions">
+        <a mat-flat-button routerLink="/events"><app-icon name="search" /> Khám phá sự kiện</a>
+        @if (!session.isAuthenticated()) {
+          <a mat-stroked-button routerLink="/register"><app-icon name="user" /> Tạo tài khoản</a>
+        } @else if (session.isCustomer()) {
+          <a mat-stroked-button routerLink="/tickets">Vé của tôi</a>
+        } @else if (session.isOrganizer()) {
+          <a mat-stroked-button routerLink="/organizer">Quản lý sự kiện của tôi</a>
+        } @else if (session.isAdmin()) {
+          <a mat-stroked-button routerLink="/admin">Tổng quan quản trị</a>
+        }
+      </div>
+    </section>
+
+    <section aria-labelledby="featured-title">
+      <div class="section-heading">
+        <h2 id="featured-title">Sự kiện sắp diễn ra</h2>
+        <a routerLink="/events" class="muted">Xem tất cả →</a>
+      </div>
+      @if (loading()) {
+        <app-loading-state label="Đang tải sự kiện…" />
+      } @else if (error()) {
+        <p class="form-notice error" role="alert">{{ error() }}</p>
+        <button mat-stroked-button type="button" (click)="load()">Thử lại</button>
+      } @else if (featured().length === 0) {
+        <p class="muted">Hiện chưa có sự kiện nào được công bố.</p>
+      } @else {
+        <div class="event-grid">
+          @for (ev of featured(); track ev.id) {
+            <a class="event-card" [routerLink]="['/events', ev.id]">
+              <div class="event-banner" [style.background-image]="bannerStyle(ev)">
+                @if (!ev.bannerUrl) {
+                  <app-icon name="calendar" />
+                }
+              </div>
+              <div class="event-body">
+                <span class="event-cat">{{ ev.category.name }}</span>
+                <h3>{{ ev.title }}</h3>
+                <app-event-sales-status [event]="ev" [now]="now()" />
+                <dl class="card-dates">
+                  <div><dt>Diễn ra</dt><dd>{{ ev.startTime | dateTime }}</dd></div>
+                  <div><dt>Mở bán</dt><dd>{{ ev.salesStartTime | dateTime }}</dd></div>
+                </dl>
+                <p class="event-meta">
+                  <app-icon name="compass" /> {{ ev.venue.name }}, {{ ev.venue.city }}
+                </p>
+              </div>
+            </a>
+          }
+        </div>
+      }
+    </section>

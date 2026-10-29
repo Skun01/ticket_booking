@@ -1,0 +1,133 @@
+    <app-page-header title="Đặt vé" subtitle="Chọn một hạng vé và số lượng cho đơn của bạn." />
+    @if (loading()) {
+      <app-loading-state label="Đang tải thông tin đặt vé…" />
+    } @else if (loadError()) {
+      <p class="form-notice error" role="alert">{{ loadError() }}</p>
+      <a mat-stroked-button routerLink="/events">Khám phá sự kiện</a>
+    } @else if (event(); as ev) {
+      <a class="text-link" [routerLink]="['/events', ev.id]">Về chi tiết sự kiện</a>
+      <div class="booking-grid">
+        <section class="panel">
+          <h2>{{ ev.title }}</h2>
+          <app-event-sales-status [event]="ev" [now]="now()" />
+          <dl class="booking-dates">
+            <div><dt>Diễn ra</dt><dd>{{ ev.startTime | dateTime }} đến {{ ev.endTime | dateTime }}</dd></div>
+            <div><dt>Mở bán</dt><dd>{{ ev.salesStartTime | dateTime }}</dd></div>
+            <div><dt>Đóng bán</dt><dd>{{ ev.startTime | dateTime }} (khi sự kiện bắt đầu)</dd></div>
+          </dl>
+          <p class="schedule-note">Thời gian theo giờ Việt Nam (UTC+7).</p>
+          <p class="muted">{{ ev.venue.name }}, {{ ev.venue.city }}</p>
+
+          <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+            <fieldset class="ticket-options" [disabled]="busy() || uncertain()">
+              <legend>Chọn hạng vé</legend>
+              <div class="ticket-list" role="radiogroup" aria-label="Hạng vé">
+                @for (tt of ev.ticketTypes; track tt.id) {
+                  <button
+                    type="button"
+                    class="ticket-option"
+                    role="radio"
+                    [class.selected]="values().ticketTypeId === tt.id"
+                    [attr.aria-checked]="values().ticketTypeId === tt.id"
+                    [disabled]="!!unavailableReason(tt) || busy() || uncertain()"
+                    (click)="select(tt)"
+                  >
+                    <span class="to-info">
+                      <strong class="to-name">{{ tt.name }}</strong>
+                      @if (unavailableReason(tt)) {
+                        <span class="to-reason">{{ unavailableReason(tt) }}</span>
+                      }
+                    </span>
+                    <span class="to-right">
+                      <span class="to-price">{{ tt.price | money }}</span>
+                      <span class="to-mark" aria-hidden="true">
+                        @if (values().ticketTypeId === tt.id) {
+                          <app-icon name="check" />
+                        }
+                      </span>
+                    </span>
+                  </button>
+                }
+              </div>
+            </fieldset>
+
+            @if (selected(); as tt) {
+              <div class="qty-block">
+                <div class="qty-head">
+                  <span class="qty-label">Số lượng</span>
+                  <span class="muted qty-hint">Tối đa {{ limit() }} vé/đơn</span>
+                </div>
+                <div class="stepper" role="group" aria-label="Số lượng vé">
+                  <button
+                    type="button"
+                    class="step-btn"
+                    (click)="decrement()"
+                    [disabled]="busy() || uncertain() || quantity() <= 1"
+                    aria-label="Giảm số lượng"
+                  >
+                    −
+                  </button>
+                  <span class="step-value" aria-live="polite" aria-atomic="true">
+                    {{ quantity() }}
+                  </span>
+                  <button
+                    type="button"
+                    class="step-btn"
+                    (click)="increment()"
+                    [disabled]="busy() || uncertain() || quantity() >= limit()"
+                    aria-label="Tăng số lượng"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            }
+
+            @if (validationError()) {
+              <p class="form-notice warning" role="status">{{ validationError() }}</p>
+            }
+            @if (error()) {
+              <p class="form-notice error" role="alert">{{ error() }}</p>
+            }
+            @if (uncertain()) {
+              <p class="muted">
+                Chưa xác nhận được kết quả tạo đơn. Kiểm tra đơn của tôi trước khi đặt lại để tránh
+                giữ chỗ trùng.
+              </p>
+              <a mat-flat-button routerLink="/orders">Kiểm tra đơn của tôi</a>
+            } @else {
+              <button
+                mat-flat-button
+                type="submit"
+                class="submit-btn"
+                [disabled]="busy() || !!validationError() || !session.isCustomer()"
+                [attr.aria-busy]="busy()"
+              >
+                {{ busy() ? 'Đang tạo đơn…' : 'Tạo đơn và giữ chỗ' }}
+              </button>
+            }
+          </form>
+        </section>
+
+        <aside class="panel summary" aria-label="Tóm tắt đặt vé">
+          <h2>Tóm tắt</h2>
+          @if (selected(); as tt) {
+            <div class="summary-line">
+              <span>{{ tt.name }}</span>
+              <span>{{ tt.price | money }}</span>
+            </div>
+            <div class="summary-line muted">
+              <span>Số lượng</span>
+              <span>× {{ quantity() || 0 }}</span>
+            </div>
+            <p class="total">Tạm tính: {{ estimate() | money }}</p>
+          } @else {
+            <p class="muted">Chọn một hạng vé để xem tạm tính.</p>
+          }
+          <p class="muted">
+            Đơn chỉ giữ chỗ sau khi tạo thành công. Giá và số lượng cuối cùng được backend xác nhận.
+          </p>
+          <p class="muted">Bạn sẽ xem thời hạn giữ chỗ và thanh toán giả lập ở bước tiếp theo.</p>
+        </aside>
+      </div>
+    }

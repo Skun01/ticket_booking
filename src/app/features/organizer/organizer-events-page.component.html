@@ -1,0 +1,48 @@
+    <app-page-header
+      title="Sự kiện của tôi"
+      subtitle="Quản lý bản nháp, hạng vé và theo dõi doanh thu sự kiện."
+    >
+      <a mat-flat-button routerLink="/organizer/events/new">Tạo sự kiện</a>
+    </app-page-header>
+    @if (loading()) {
+      <app-loading-state label="Đang tải sự kiện…" />
+    } @else if (error()) {
+      <p class="form-notice error" role="alert">{{ error() }}</p>
+      <button mat-stroked-button type="button" (click)="load(page())">Thử lại</button>
+    } @else {
+      <p class="muted">
+        {{ total() }} sự kiện. Chỉ bản nháp mới được chỉnh sửa thông tin và hạng vé.
+      </p>
+      @if (events().length === 0) {
+        <app-empty-state
+          icon="calendar"
+          title="Chưa có sự kiện"
+          description="Tạo bản nháp, thêm hạng vé, sau đó phát hành sự kiện của bạn."
+        />
+      } @else {
+        <div class="events">
+          @for (ev of events(); track ev.id) {
+            <article class="event">
+              <div>
+                <app-status-badge [status]="ev.status" />
+                <h2>
+                  <a [routerLink]="['/organizer/events', ev.id]">{{ ev.title }}</a>
+                </h2>
+                <p>{{ ev.startTime | dateTime }} đến {{ ev.endTime | dateTime }}</p>
+                <p class="muted">
+                  {{ ev.category.name }} · {{ ev.venue.name }}, {{ ev.venue.city }}
+                </p>
+              </div>
+              <div class="actions">
+                <a mat-stroked-button [routerLink]="['/organizer/events', ev.id]">Quản lý</a>
+                @if (ev.status === 'DRAFT') {
+                  <a [routerLink]="['/organizer/events', ev.id, 'edit']">Sửa thông tin</a>
+                }
+                <a [routerLink]="['/organizer/events', ev.id, 'report']">Báo cáo</a>
+              </div>
+            </article>
+          }
+        </div>
+      }
+      <app-paginator [page]="page()" [totalPages]="totalPages()" (pageChange)="load($event)" />
+    }

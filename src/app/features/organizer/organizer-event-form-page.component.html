@@ -1,0 +1,119 @@
+    <app-page-header
+      [title]="id() ? 'Sửa sự kiện' : 'Tạo sự kiện'"
+      subtitle="Lưu bản nháp trước, cấu hình hạng vé rồi mới phát hành."
+    >
+      <a mat-stroked-button routerLink="/organizer">Sự kiện của tôi</a>
+    </app-page-header>
+    @if (loading()) {
+      <app-loading-state label="Đang tải thông tin và danh mục…" />
+    } @else if (loadError()) {
+      <p class="form-notice error" role="alert">{{ loadError() }}</p>
+      @if (!invalidRoute()) {
+        <button mat-stroked-button type="button" (click)="load()">Thử lại</button>
+      }
+    } @else if (!editable()) {
+      <p class="form-notice warning" role="status">
+        Chỉ sự kiện ở trạng thái nháp mới được chỉnh sửa.
+      </p>
+      <a mat-stroked-button [routerLink]="['/organizer/events', id()]">Về quản lý sự kiện</a>
+    } @else if (!categories().length || !venues().length) {
+      <p class="form-notice warning" role="status">
+        Chưa có danh mục hoặc địa điểm để chọn. Vui lòng nhờ quản trị viên bổ sung dữ liệu.
+      </p>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="save()" novalidate class="panel event-form">
+        <h2>Thông tin sự kiện</h2>
+        <mat-form-field appearance="outline" class="wide">
+          <mat-label>Tiêu đề</mat-label>
+          <input matInput formControlName="title" maxlength="200" required />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Danh mục</mat-label>
+          <mat-select formControlName="categoryId" required>
+            @for (category of categories(); track category.id) {
+              <mat-option [value]="category.id">{{ category.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Địa điểm</mat-label>
+          <mat-select formControlName="venueId" required>
+            @for (venue of venues(); track venue.id) {
+              <mat-option [value]="venue.id"
+                >{{ venue.name }} - {{ venue.city }} ({{ venue.capacity }} chỗ)</mat-option
+              >
+            }
+          </mat-select>
+        </mat-form-field>
+        <p class="muted wide">
+          Nhập thời gian theo giờ Việt Nam (UTC+7), kể cả khi bạn đang ở múi giờ khác.
+        </p>
+        <mat-form-field appearance="outline">
+          <mat-label>Mở bán (giờ Việt Nam)</mat-label>
+          <input
+            matInput
+            type="datetime-local"
+            step="1"
+            formControlName="salesStartTime"
+            required
+          />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Bắt đầu (giờ Việt Nam)</mat-label>
+          <input matInput type="datetime-local" step="1" formControlName="startTime" required />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Kết thúc (giờ Việt Nam)</mat-label>
+          <input matInput type="datetime-local" step="1" formControlName="endTime" required />
+        </mat-form-field>
+        <p class="muted">
+          Tất cả hạng vé cùng mở bán vào thời điểm này và tự động ngừng bán khi sự kiện bắt đầu.
+        </p>
+        <mat-form-field appearance="outline" class="wide">
+          <mat-label>URL banner (không bắt buộc)</mat-label>
+          <input
+            matInput
+            type="url"
+            formControlName="bannerUrl"
+            maxlength="500"
+            placeholder="https://..."
+          />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="wide">
+          <mat-label>Mô tả (không bắt buộc)</mat-label>
+          <textarea matInput formControlName="description" maxlength="15000" rows="7"></textarea>
+        </mat-form-field>
+        @if (error()) {
+          <p class="form-notice error wide" role="alert">{{ error() }}</p>
+        }
+        @if (fieldErrors().length) {
+          <ul class="wide" aria-label="Lỗi dữ liệu từ máy chủ">
+            @for (err of fieldErrors(); track err.field) {
+              <li>{{ err.field }}: {{ err.message }}</li>
+            }
+          </ul>
+        }
+        @if (uncertain()) {
+          <div class="wide form-notice warning" role="status">
+            <p>
+              Chưa xác nhận được kết quả lưu. Kiểm tra sự kiện trước khi gửi lại để tránh tạo trùng
+              hoặc ghi đè dữ liệu.
+            </p>
+            <a [routerLink]="id() ? ['/organizer/events', id()] : ['/organizer']"
+              >Kiểm tra sự kiện đã lưu</a
+            >
+          </div>
+        }
+        <div class="wide form-actions">
+          <button
+            mat-flat-button
+            type="submit"
+            [disabled]="busy() || uncertain()"
+            [attr.aria-busy]="busy()"
+          >
+            {{ busy() ? 'Đang lưu…' : 'Lưu bản nháp' }}
+          </button>
+          <a mat-stroked-button routerLink="/organizer">Quay lại</a>
+        </div>
+      </form>
+    }

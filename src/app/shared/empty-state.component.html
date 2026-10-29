@@ -1,0 +1,6 @@
+    <div class="empty-state">
+      <app-icon [name]="icon()" />
+      <p class="title">{{ title() }}</p>
+      @if (description()) { <p class="muted">{{ description() }}</p> }
+      <ng-content />
+    </div>

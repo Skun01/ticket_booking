@@ -3,7 +3,14 @@ import { ActivatedRouteSnapshot, provideRouter, Router, RouterStateSnapshot, Url
 import { adminGuard } from './admin.guard';
 import { CurrentUser, SessionService } from './session.service';
 
-const admin: CurrentUser = { id: 1, email: 'admin@example.test', fullName: 'Admin', role: 'ADMIN' };
+const admin: CurrentUser = {
+  id: 1,
+  email: 'admin@example.test',
+  fullName: 'Admin',
+  phone: null,
+  role: 'ADMIN',
+  status: 'ACTIVE',
+};
 
 describe('adminGuard', () => {
   let user: CurrentUser | null;
@@ -39,8 +46,8 @@ describe('adminGuard', () => {
     expect(TestBed.inject(Router).serializeUrl(result as UrlTree)).toBe('/login');
   });
 
-  it('sends USER to the forbidden page', async () => {
-    user = { ...admin, role: 'USER' };
+  it('sends non-ADMIN to the forbidden page', async () => {
+    user = { ...admin, role: 'CUSTOMER' };
     const result = await run();
     expect(TestBed.inject(Router).serializeUrl(result as UrlTree)).toBe('/forbidden');
   });

@@ -1,0 +1,152 @@
+    <app-page-header
+      title="Chi tiết đơn vé"
+      subtitle="Kiểm tra đơn và hoàn tất thanh toán trong thời gian giữ chỗ."
+    >
+      <a mat-stroked-button routerLink="/orders">Đơn của tôi</a>
+    </app-page-header>
+    @if (error()) {
+      <p class="form-notice error" role="alert">{{ error() }}</p>
+      @if (authRequired()) {
+        <a mat-stroked-button routerLink="/login" [queryParams]="{ returnUrl: '/orders/' + id() }"
+          >Đăng nhập lại</a
+        >
+      }
+    }
+    @if (notice()) {
+      <p class="form-notice success" role="status">{{ notice() }}</p>
+    }
+    @if (loading()) {
+      <app-loading-state label="Đang tải đơn vé…" />
+    } @else if (order(); as order) {
+      <section class="panel">
+        <div class="order-heading">
+          <h2>{{ order.orderCode }}</h2>
+          <app-status-badge [status]="order.status" />
+        </div>
+        <p class="muted">Đặt lúc {{ order.createdAt | dateTime }}</p>
+        @if (order.status === 'PENDING') {
+          @if (expired()) {
+            <p class="form-notice warning" role="status">
+              Đã hết thời gian giữ chỗ. Không thể tiếp tục thanh toán. Trạng thái được xác nhận từ
+              máy chủ khi cập nhật đơn.
+            </p>
+          } @else {
+            <p class="countdown">
+              Thời gian giữ chỗ còn lại: <strong>{{ countdown() }}</strong>
+            </p>
+          }
+          <p class="muted">Hạn thanh toán: {{ order.expiresAt | dateTime }} (giờ Việt Nam)</p>
+        }
+        <div class="items">
+          @for (item of order.items; track item.id) {
+            <div class="item-row">
+              <div>
+                <strong>{{ item.ticketTypeName }}</strong
+                ><br />
+                <a [routerLink]="['/events', item.eventId]">Xem sự kiện</a>
+              </div>
+              <span>{{ item.quantity }} × {{ item.unitPrice | money }}</span>
+              <strong>{{ item.quantity * item.unitPrice | money }}</strong>
+            </div>
+          }
+        </div>
+        <dl class="totals">
+          <div>
+            <dt>Giảm giá</dt>
+            <dd>{{ order.discountAmount | money }}</dd>
+          </div>
+          <div class="grand-total">
+            <dt>Tổng thanh toán</dt>
+            <dd>{{ order.totalAmount | money }}</dd>
+          </div>
+        </dl>
+      </section>
+      @if (order.status === 'PENDING') {
+        <section class="panel" aria-labelledby="payment-title">
+          <h2 id="payment-title">Thanh toán giả lập</h2>
+          <p class="muted">
+            Phương thức MOCK chỉ mô phỏng giao dịch, không trừ tiền thật và không yêu cầu thông tin
+            thẻ.
+          </p>
+          <mat-checkbox [formControl]="simulateFailure" [disabled]="busy() || refreshing()"
+            >Mô phỏng thanh toán thất bại</mat-checkbox
+          >
+          @if (needsRefresh()) {
+            <p class="form-notice warning" role="status">
+              Chưa xác nhận được trạng thái mới nhất. Hãy cập nhật đơn trước khi thao tác lại; không
+              gửi thanh toán liên tục.
+            </p>
+          }
+          <div class="form-actions">
+            <button
+              mat-flat-button
+              type="button"
+              data-action="pay"
+              (click)="pay()"
+              [disabled]="!canPay()"
+              [attr.aria-busy]="busy()"
+            >
+              {{ actionName() === 'pay' ? 'Đang thanh toán…' : 'Thanh toán' }}
+            </button>
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="confirmCancel.set(true)"
+              [disabled]="!canPay()"
+            >
+              Hủy đơn
+            </button>
+          </div>
+          @if (confirmCancel()) {
+            <div class="form-notice warning" role="group" appFocusOnShow aria-label="Xác nhận hủy đơn">
+              <p>Hủy đơn này và trả lại số vé đang giữ chỗ?</p>
+              <div class="form-actions">
+                <button
+                  mat-flat-button
+                  type="button"
+                  data-action="cancel"
+                  (click)="cancel()"
+                  [disabled]="!canPay()"
+                >
+                  Xác nhận hủy
+                </button>
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="confirmCancel.set(false)"
+                  [disabled]="busy()"
+                >
+                  Giữ đơn
+                </button>
+              </div>
+            </div>
+          }
+        </section>
+      } @else if (order.status === 'PAID') {
+        <section class="panel payment-success">
+          <h2>Thanh toán thành công</h2>
+          <p>Vé điện tử của đơn đã được phát hành. Bạn có thể tải từng vé PDF có mã QR.</p>
+          <a mat-flat-button routerLink="/tickets">Vé của tôi</a>
+        </section>
+      } @else {
+        <section class="panel">
+          <p>
+            Đơn đã {{ order.status === 'EXPIRED' ? 'hết hạn' : 'bị hủy' }}. Không thể thanh toán lại
+            đơn này.
+          </p>
+          <a mat-stroked-button routerLink="/events">Chọn sự kiện khác</a>
+        </section>
+      }
+      <div class="form-actions">
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="load()"
+          [disabled]="busy() || refreshing()"
+        >
+          {{ refreshing() ? 'Đang cập nhật…' : 'Cập nhật đơn' }}
+        </button>
+      </div>
+    } @else if (id()) {
+      <button mat-stroked-button type="button" (click)="load()">Thử lại</button>
+    }

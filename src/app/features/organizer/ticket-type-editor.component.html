@@ -1,0 +1,80 @@
+    <section class="panel" appFocusOnShow aria-labelledby="ticket-editor-title">
+      <h2 id="ticket-editor-title">{{ ticketType() ? 'Sửa hạng vé' : 'Thêm hạng vé' }}</h2>
+      <p class="muted">
+        Tổng số vé mọi hạng không được vượt {{ event().venue.capacity }} chỗ của địa điểm.
+      </p>
+      <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+        <mat-form-field appearance="outline" class="wide">
+          <mat-label>Tên hạng vé</mat-label>
+          <input matInput formControlName="name" maxlength="100" required />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Giá vé (VND)</mat-label>
+          <input
+            matInput
+            type="text"
+            inputmode="decimal"
+            formControlName="price"
+            maxlength="13"
+            required
+            aria-describedby="price-help"
+          />
+        </mat-form-field>
+        <p id="price-help" class="muted">
+          Dùng dấu chấm cho phần thập phân, tối đa 2 chữ số. Nhập 0 cho vé miễn phí.
+        </p>
+        <mat-form-field appearance="outline">
+          <mat-label>Tổng số vé</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="totalQuantity"
+            min="1"
+            max="2147483647"
+            step="1"
+            required
+          />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Tối đa mỗi đơn</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="maxPerOrder"
+            min="1"
+            max="2147483647"
+            step="1"
+            required
+          />
+        </mat-form-field>
+        @if (error()) {
+          <p class="form-notice error wide" role="alert">{{ error() }}</p>
+        }
+        @if (fieldErrors().length) {
+          <ul class="wide">
+            @for (err of fieldErrors(); track err.field) {
+              <li>{{ err.field }}: {{ err.message }}</li>
+            }
+          </ul>
+        }
+        @if (uncertain()) {
+          <p class="form-notice warning wide" role="status">
+            Chưa xác nhận được kết quả lưu. Hãy cập nhật lại trang quản lý trước khi gửi thêm để
+            tránh tạo hạng vé trùng.
+          </p>
+        }
+        <div class="wide form-actions">
+          <button
+            mat-flat-button
+            type="submit"
+            [disabled]="busy() || uncertain()"
+            [attr.aria-busy]="busy()"
+          >
+            {{ busy() ? 'Đang lưu…' : 'Lưu hạng vé' }}
+          </button>
+          <button mat-stroked-button type="button" (click)="closed.emit()" [disabled]="busy()">
+            Đóng form
+          </button>
+        </div>
+      </form>
+    </section>

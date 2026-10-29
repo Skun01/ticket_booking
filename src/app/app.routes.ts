@@ -6,64 +6,64 @@ import { organizerGuard } from './core/auth/organizer.guard';
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./layout/public-layout').then((m) => m.PublicLayout),
+    loadComponent: () => import('./layout/public-layout.component').then((m) => m.PublicLayout),
     children: [
       {
         path: '',
         pathMatch: 'full',
         title: 'Trang chủ · Fullstack Starter',
-        loadComponent: () => import('./features/home/home-page').then((m) => m.HomePage),
+        loadComponent: () => import('./features/home/home-page.component').then((m) => m.HomePage),
       },
       {
         path: 'login',
         title: 'Đăng nhập · Fullstack Starter',
-        loadComponent: () => import('./features/auth/login-page').then((m) => m.LoginPage),
+        loadComponent: () => import('./features/auth/login-page.component').then((m) => m.LoginPage),
       },
       {
         path: 'register',
         title: 'Đăng ký · Fullstack Starter',
-        loadComponent: () => import('./features/auth/register-page').then((m) => m.RegisterPage),
+        loadComponent: () => import('./features/auth/register-page.component').then((m) => m.RegisterPage),
       },
       {
         path: 'events',
         title: 'Sự kiện · Fullstack Starter',
-        loadComponent: () => import('./features/events/events-page').then((m) => m.EventsPage),
+        loadComponent: () => import('./features/events/events-page.component').then((m) => m.EventsPage),
       },
       {
         path: 'events/:id/book',
         canActivate: [customerGuard],
         title: 'Đặt vé · Fullstack Starter',
-        loadComponent: () => import('./features/events/booking-page').then((m) => m.BookingPage),
+        loadComponent: () => import('./features/events/booking-page.component').then((m) => m.BookingPage),
       },
       {
         path: 'orders',
         canActivate: [customerGuard],
         title: 'Đơn của tôi · Fullstack Starter',
-        loadComponent: () => import('./features/orders/orders-page').then((m) => m.OrdersPage),
+        loadComponent: () => import('./features/orders/orders-page.component').then((m) => m.OrdersPage),
       },
       {
         path: 'orders/:id',
         canActivate: [customerGuard],
         title: 'Chi tiết đơn vé · Fullstack Starter',
         loadComponent: () =>
-          import('./features/orders/order-detail-page').then((m) => m.OrderDetailPage),
+          import('./features/orders/order-detail-page.component').then((m) => m.OrderDetailPage),
       },
       {
         path: 'tickets',
         canActivate: [customerGuard],
         title: 'Vé của tôi · Fullstack Starter',
-        loadComponent: () => import('./features/tickets/tickets-page').then((m) => m.TicketsPage),
+        loadComponent: () => import('./features/tickets/tickets-page.component').then((m) => m.TicketsPage),
       },
       {
         path: 'events/:id',
         title: 'Chi tiết sự kiện · Fullstack Starter',
         loadComponent: () =>
-          import('./features/events/event-detail-page').then((m) => m.EventDetailPage),
+          import('./features/events/event-detail-page.component').then((m) => m.EventDetailPage),
       },
       {
         path: 'forbidden',
         title: 'Không đủ quyền · Fullstack Starter',
-        loadComponent: () => import('./features/status/status-page').then((m) => m.StatusPage),
+        loadComponent: () => import('./features/status/status-page.component').then((m) => m.StatusPage),
         data: {
           title: 'Bạn không có quyền truy cập',
           label: '403 · KHÔNG ĐỦ QUYỀN',
@@ -77,33 +77,33 @@ export const routes: Routes = [
     path: 'admin',
     canActivate: [adminGuard],
     canActivateChild: [adminGuard],
-    loadComponent: () => import('./layout/admin-layout').then((m) => m.AdminLayout),
+    loadComponent: () => import('./layout/admin-layout.component').then((m) => m.AdminLayout),
     children: [
       {
         path: '',
         pathMatch: 'full',
         title: 'Quản trị · Fullstack Starter',
-        loadComponent: () => import('./features/admin/admin-home').then((m) => m.AdminHome),
+        loadComponent: () => import('./features/admin/admin-home.component').then((m) => m.AdminHome),
       },
       {
         path: 'categories',
         title: 'Quản lý danh mục · Fullstack Starter',
         data: { catalog: 'categories' },
         loadComponent: () =>
-          import('./features/admin/admin-catalog-page').then((m) => m.AdminCatalogPage),
+          import('./features/admin/admin-catalog-page.component').then((m) => m.AdminCatalogPage),
       },
       {
         path: 'venues',
         title: 'Quản lý địa điểm · Fullstack Starter',
         data: { catalog: 'venues' },
         loadComponent: () =>
-          import('./features/admin/admin-catalog-page').then((m) => m.AdminCatalogPage),
+          import('./features/admin/admin-catalog-page.component').then((m) => m.AdminCatalogPage),
       },
       {
         path: 'reports',
         title: 'Báo cáo doanh thu · Fullstack Starter',
         loadComponent: () =>
-          import('./features/admin/admin-reports-page').then((m) => m.AdminReportsPage),
+          import('./features/admin/admin-reports-page.component').then((m) => m.AdminReportsPage),
       },
     ],
   },
@@ -111,26 +111,26 @@ export const routes: Routes = [
     path: 'organizer',
     canActivate: [organizerGuard],
     canActivateChild: [organizerGuard],
-    loadComponent: () => import('./layout/organizer-layout').then((m) => m.OrganizerLayout),
+    loadComponent: () => import('./layout/organizer-layout.component').then((m) => m.OrganizerLayout),
     children: [
       {
         path: '',
         pathMatch: 'full',
         title: 'Sự kiện của tôi · Fullstack Starter',
         loadComponent: () =>
-          import('./features/organizer/organizer-events-page').then((m) => m.OrganizerEventsPage),
+          import('./features/organizer/organizer-events-page.component').then((m) => m.OrganizerEventsPage),
       },
       {
         path: 'checkin',
         title: 'Check-in vé · Fullstack Starter',
         loadComponent: () =>
-          import('./features/organizer/organizer-checkin-page').then((m) => m.OrganizerCheckInPage),
+          import('./features/organizer/organizer-checkin-page.component').then((m) => m.OrganizerCheckInPage),
       },
       {
         path: 'events/new',
         title: 'Tạo sự kiện · Fullstack Starter',
         loadComponent: () =>
-          import('./features/organizer/organizer-event-form-page').then(
+          import('./features/organizer/organizer-event-form-page.component').then(
             (m) => m.OrganizerEventFormPage,
           ),
       },
@@ -138,7 +138,7 @@ export const routes: Routes = [
         path: 'events/:id/edit',
         title: 'Sửa sự kiện · Fullstack Starter',
         loadComponent: () =>
-          import('./features/organizer/organizer-event-form-page').then(
+          import('./features/organizer/organizer-event-form-page.component').then(
             (m) => m.OrganizerEventFormPage,
           ),
       },
@@ -146,7 +146,7 @@ export const routes: Routes = [
         path: 'events/:id/report',
         title: 'Báo cáo sự kiện · Fullstack Starter',
         loadComponent: () =>
-          import('./features/organizer/organizer-event-report-page').then(
+          import('./features/organizer/organizer-event-report-page.component').then(
             (m) => m.OrganizerEventReportPage,
           ),
       },
@@ -154,7 +154,7 @@ export const routes: Routes = [
         path: 'events/:id',
         title: 'Quản lý sự kiện · Fullstack Starter',
         loadComponent: () =>
-          import('./features/organizer/organizer-event-detail-page').then(
+          import('./features/organizer/organizer-event-detail-page.component').then(
             (m) => m.OrganizerEventDetailPage,
           ),
       },
@@ -163,7 +163,7 @@ export const routes: Routes = [
   {
     path: '**',
     title: 'Không tìm thấy trang · Fullstack Starter',
-    loadComponent: () => import('./features/status/status-page').then((m) => m.StatusPage),
+    loadComponent: () => import('./features/status/status-page.component').then((m) => m.StatusPage),
     data: {
       title: 'Không tìm thấy trang',
       label: '404 · KHÔNG TÌM THẤY',

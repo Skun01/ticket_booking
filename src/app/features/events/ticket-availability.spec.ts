@@ -1,4 +1,4 @@
-import { EventSalesSchedule } from './event-sales-status';
+import { EventSalesSchedule } from './event-sales-status.component';
 import { ticketUnavailableReason } from './ticket-availability';
 
 const salesStart = Date.parse('2026-01-01T00:00:00.000Z');

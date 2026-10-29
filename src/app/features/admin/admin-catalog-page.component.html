@@ -1,0 +1,229 @@
+    <app-page-header
+      [title]="isCategory() ? 'Quản lý danh mục' : 'Quản lý địa điểm'"
+      [subtitle]="
+        isCategory()
+          ? 'Danh mục được dùng để phân loại và lọc sự kiện.'
+          : 'Địa điểm cung cấp thông tin tổ chức và giới hạn sức chứa sự kiện.'
+      "
+    >
+      <button mat-flat-button type="button" (click)="create()" [disabled]="blocked()">
+        {{ isCategory() ? 'Thêm danh mục' : 'Thêm địa điểm' }}
+      </button>
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="reload()"
+        [disabled]="busy() || detailLoading() || loading()"
+      >
+        Cập nhật danh sách
+      </button>
+    </app-page-header>
+    @if (notice()) {
+      <p class="form-notice success" role="status">{{ notice() }}</p>
+    }
+    @if (error()) {
+      <p class="form-notice error" role="alert">{{ error() }}</p>
+    }
+    @if (mustRefresh()) {
+      <p class="form-notice warning" role="status">
+        Cần cập nhật danh sách để đối soát kết quả trước khi thao tác tiếp. Không gửi lại yêu cầu
+        lưu/xóa liên tục khi chưa rõ kết quả.
+      </p>
+    }
+    @if (detailLoading()) {
+      <app-loading-state label="Đang tải dữ liệu mới nhất để chỉnh sửa…" />
+    }
+    @if (editorOpen()) {
+      <section class="panel editor" aria-labelledby="catalog-editor-title">
+        <h2 id="catalog-editor-title">
+          {{ editId() ? 'Chỉnh sửa' : 'Tạo mới' }} {{ isCategory() ? 'danh mục' : 'địa điểm' }}
+        </h2>
+        <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+          <mat-form-field appearance="outline" class="wide">
+            <mat-label>{{ isCategory() ? 'Tên danh mục' : 'Tên địa điểm' }}</mat-label>
+            <input
+              #nameInput
+              matInput
+              formControlName="name"
+              [maxlength]="isCategory() ? 100 : 150"
+              required
+            />
+          </mat-form-field>
+          @if (isCategory()) {
+            <mat-form-field appearance="outline" class="wide">
+              <mat-label>Slug</mat-label>
+              <input
+                matInput
+                formControlName="slug"
+                maxlength="120"
+                required
+                aria-describedby="slug-help"
+              />
+            </mat-form-field>
+            <p id="slug-help" class="muted wide">
+              Chữ thường a-z, số 0-9 và dấu gạch nối giữa các phần. Ví dụ: the-thao. Slug phải duy
+              nhất.
+            </p>
+          } @else {
+            <mat-form-field appearance="outline" class="wide">
+              <mat-label>Địa chỉ</mat-label>
+              <input matInput formControlName="address" maxlength="255" required />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Thành phố</mat-label>
+              <input matInput formControlName="city" maxlength="100" required />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Sức chứa</mat-label>
+              <input
+                matInput
+                type="number"
+                formControlName="capacity"
+                min="1"
+                max="2147483647"
+                step="1"
+                required
+              />
+            </mat-form-field>
+            <p class="muted wide">
+              Nếu địa điểm đã được sự kiện sử dụng, backend không cho đổi sức chứa; vẫn có thể cập
+              nhật tên và địa chỉ.
+            </p>
+          }
+          @if (fieldErrors().length) {
+            <ul class="wide" aria-label="Lỗi dữ liệu từ máy chủ">
+              @for (err of fieldErrors(); track err.field) {
+                <li>{{ err.field }}: {{ err.message }}</li>
+              }
+            </ul>
+          }
+          <div class="wide form-actions">
+            <button mat-flat-button type="submit" [disabled]="blocked()" [attr.aria-busy]="busy()">
+              {{ busy() ? 'Đang lưu…' : 'Lưu' }}
+            </button>
+            <button mat-stroked-button type="button" (click)="closeEditor()" [disabled]="busy()">
+              Đóng form
+            </button>
+          </div>
+        </form>
+      </section>
+    }
+    @if (confirmDelete(); as item) {
+      <section class="panel" role="group" appFocusOnShow aria-labelledby="delete-title">
+        <h2 id="delete-title">Xác nhận xóa {{ isCategory() ? 'danh mục' : 'địa điểm' }}</h2>
+        <p>
+          Xóa “{{ item.name }}” (ID {{ item.id }})? Không thể xóa nếu dữ liệu đang được sự kiện sử
+          dụng.
+        </p>
+        <div class="form-actions">
+          <button
+            mat-flat-button
+            type="button"
+            (click)="remove()"
+            [disabled]="blocked()"
+            [attr.aria-busy]="busy()"
+          >
+            {{ busy() ? 'Đang xóa…' : 'Xác nhận xóa' }}
+          </button>
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="confirmDelete.set(null)"
+            [disabled]="busy()"
+          >
+            Giữ lại
+          </button>
+        </div>
+      </section>
+    }
+    @if (loading()) {
+      <app-loading-state label="Đang tải danh sách…" />
+    } @else if (listError()) {
+      <p class="form-notice error" role="alert">{{ listError() }}</p>
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="reload()"
+        [disabled]="busy() || detailLoading()"
+      >
+        Thử lại
+      </button>
+    } @else {
+      <p class="muted count">
+        Tổng cộng {{ total() }} {{ isCategory() ? 'danh mục' : 'địa điểm' }}
+      </p>
+      @if (!rows().length) {
+        <app-empty-state
+          icon="list"
+          [title]="isCategory() ? 'Chưa có danh mục' : 'Chưa có địa điểm'"
+          description="Dùng nút thêm để tạo dữ liệu cho các sự kiện."
+        />
+      } @else {
+        <div
+          class="table-scroll"
+          role="region"
+          tabindex="0"
+          aria-label="Danh sách catalog quản trị"
+        >
+          <table>
+            <caption class="visually-hidden">
+              {{
+                isCategory() ? 'Danh sách danh mục' : 'Danh sách địa điểm'
+              }}
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Tên</th>
+                @if (isCategory()) {
+                  <th scope="col">Slug</th>
+                } @else {
+                  <th scope="col">Địa chỉ</th>
+                  <th scope="col">Thành phố</th>
+                  <th scope="col">Sức chứa</th>
+                }
+                <th scope="col">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of rows(); track item.id) {
+                <tr>
+                  <td>{{ item.id }}</td>
+                  <th scope="row">{{ item.name }}</th>
+                  @if (isCategory()) {
+                    <td>{{ item.slug }}</td>
+                  } @else {
+                    <td>{{ item.address }}</td>
+                    <td>{{ item.city }}</td>
+                    <td>{{ item.capacity }}</td>
+                  }
+                  <td>
+                    <div class="row-actions">
+                      <button
+                        mat-stroked-button
+                        type="button"
+                        (click)="edit(item)"
+                        [disabled]="blocked()"
+                        [attr.aria-label]="'Sửa ' + item.name"
+                      >
+                        Sửa
+                      </button>
+                      <button
+                        mat-stroked-button
+                        type="button"
+                        (click)="askDelete(item)"
+                        [disabled]="blocked()"
+                        [attr.aria-label]="'Xóa ' + item.name"
+                      >
+                        Xóa
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+      <app-paginator [page]="page()" [totalPages]="totalPages()" (pageChange)="load($event)" />
+    }
