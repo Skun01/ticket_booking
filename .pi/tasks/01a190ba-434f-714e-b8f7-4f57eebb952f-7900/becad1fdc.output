@@ -1,0 +1,24 @@
+
+> frontend@0.0.0 test
+> ng test --watch=false
+
+❯ Building...
+✔ Building...
+Application bundle generation complete. [4.019 seconds] - 2026-10-31T06:59:16.092Z
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: MatIconButton is not used within the template of EventsPage[0m [1m[35m[plugin angular-compiler][0m
+
+    C:/Data/ticket_booking/src/app/features/events/events-page.component.ts:35:4:
+[37m      35 │     [32mMatIconButton[37m,
+         ╵     [32m~~~~~~~~~~~~~[0m
+
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.5 [39m[90mC:/Data/ticket_booking[39m
+
+
+[2m Test Files [22m [1m[32m12 passed[39m[22m[90m (12)[39m
+[2m      Tests [22m [1m[32m79 passed[39m[22m[90m (79)[39m
+[2m   Start at [22m 13:59:17
+[2m   Duration [22m 6.66s[2m (environment 74%, setup 14%, tests 5%, import 3%, transform 3%, worker 1%)[22m
+

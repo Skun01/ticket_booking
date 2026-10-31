@@ -1,58 +1,68 @@
-    <section class="intro-section">
-      <p class="eyebrow">NỀN TẢNG BÁN VÉ SỰ KIỆN</p>
-      <h1>Khám phá & đặt vé<br />cho những sự kiện đáng nhớ</h1>
-      <p class="lead">
-        Tìm sự kiện theo sở thích, xem hạng vé và lên lịch cho trải nghiệm tiếp theo.
-      </p>
-      <div class="hero-actions">
-        <a mat-flat-button routerLink="/events"><app-icon name="search" /> Khám phá sự kiện</a>
-        @if (!session.isAuthenticated()) {
-          <a mat-stroked-button routerLink="/register"><app-icon name="user" /> Tạo tài khoản</a>
-        } @else if (session.isCustomer()) {
-          <a mat-stroked-button routerLink="/tickets">Vé của tôi</a>
-        } @else if (session.isOrganizer()) {
-          <a mat-stroked-button routerLink="/organizer">Quản lý sự kiện của tôi</a>
-        } @else if (session.isAdmin()) {
-          <a mat-stroked-button routerLink="/admin">Tổng quan quản trị</a>
-        }
-      </div>
-    </section>
-
-    <section aria-labelledby="featured-title">
-      <div class="section-heading">
-        <h2 id="featured-title">Sự kiện sắp diễn ra</h2>
-        <a routerLink="/events" class="muted">Xem tất cả →</a>
-      </div>
-      @if (loading()) {
-        <app-loading-state label="Đang tải sự kiện…" />
-      } @else if (error()) {
-        <p class="form-notice error" role="alert">{{ error() }}</p>
-        <button mat-stroked-button type="button" (click)="load()">Thử lại</button>
-      } @else if (featured().length === 0) {
-        <p class="muted">Hiện chưa có sự kiện nào được công bố.</p>
-      } @else {
-        <div class="event-grid">
-          @for (ev of featured(); track ev.id) {
-            <a class="event-card" [routerLink]="['/events', ev.id]">
-              <div class="event-banner" [style.background-image]="bannerStyle(ev)">
-                @if (!ev.bannerUrl) {
-                  <app-icon name="calendar" />
-                }
-              </div>
-              <div class="event-body">
-                <span class="event-cat">{{ ev.category.name }}</span>
-                <h3>{{ ev.title }}</h3>
-                <app-event-sales-status [event]="ev" [now]="now()" />
-                <dl class="card-dates">
-                  <div><dt>Diễn ra</dt><dd>{{ ev.startTime | dateTime }}</dd></div>
-                  <div><dt>Mở bán</dt><dd>{{ ev.salesStartTime | dateTime }}</dd></div>
-                </dl>
-                <p class="event-meta">
-                  <app-icon name="compass" /> {{ ev.venue.name }}, {{ ev.venue.city }}
-                </p>
-              </div>
-            </a>
-          }
-        </div>
+<section class="discovery-hero" aria-labelledby="hero-title">
+  <div class="hero-copy">
+    <p class="hero-label"><span></span> MỘT TẤM VÉ. VẠN TRẢI NGHIỆM.</p>
+    <h1 id="hero-title">Ra ngoài một chút.<br />Gặp <em>điều tuyệt vời.</em></h1>
+    <p class="hero-description">Âm nhạc, nghệ thuật hay một điều hoàn toàn mới?<br class="desktop-break" /> Tìm sự kiện bạn yêu thích và biến kế hoạch thành kỷ niệm.</p>
+    <div class="hero-actions">
+      <a mat-flat-button routerLink="/events">Khám phá ngay <app-icon name="right" /></a>
+      @if (!session.isAuthenticated()) {
+        <a class="hero-secondary" routerLink="/register">Tham gia cùng chúng tôi <app-icon name="right" /></a>
+      } @else if (session.isCustomer()) {
+        <a class="hero-secondary" routerLink="/tickets">Mở ví vé của bạn <app-icon name="ticket" /></a>
+      } @else if (session.isOrganizer()) {
+        <a class="hero-secondary" routerLink="/organizer">Quản lý sự kiện <app-icon name="right" /></a>
+      } @else if (session.isAdmin()) {
+        <a class="hero-secondary" routerLink="/admin">Tổng quan quản trị <app-icon name="right" /></a>
       }
-    </section>
+    </div>
+    <div class="hero-assurance"><span><app-icon name="shield" /> Đặt vé trực tuyến</span><span><app-icon name="qr" /> Vé điện tử tiện lợi</span></div>
+  </div>
+  <div class="hero-art" aria-hidden="true">
+    <div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div>
+    <span class="art-star star-one">✦</span><span class="art-star star-two">✦</span>
+    <div class="experience-ticket">
+      <div class="ticket-art-top"><span>THE GOOD TIMES</span><app-icon name="ticket" /></div>
+      <div class="sound-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <p>ĐỪNG CHỈ<br /><strong>NGHE KỂ.</strong></p>
+      <div class="ticket-art-bottom"><span>HÃY CÓ MẶT Ở ĐÓ.</span><span>↗</span></div>
+      <div class="ticket-stub"><span>YOUR NEXT MEMORY</span><div class="art-barcode"></div></div>
+    </div>
+    <div class="floating-tag"><span>✧</span> Trải nghiệm đang chờ bạn</div>
+  </div>
+</section>
+
+<section class="discovery-shortcuts" aria-label="Lối tắt khám phá">
+  <a routerLink="/events"><span class="shortcut-icon violet"><app-icon name="compass" /></span><span><strong>Tìm cảm hứng</strong><small>Khám phá sự kiện mới</small></span><app-icon name="right" /></a>
+  <a routerLink="/events"><span class="shortcut-icon coral"><app-icon name="calendar" /></span><span><strong>Lên lịch hẹn vui</strong><small>Tìm thời gian phù hợp</small></span><app-icon name="right" /></a>
+  <a [routerLink]="session.isCustomer() ? '/tickets' : session.isOrganizer() ? '/organizer' : session.isAdmin() ? '/admin' : '/login'"><span class="shortcut-icon mint"><app-icon name="ticket" /></span><span><strong>{{ session.isOrganizer() || session.isAdmin() ? 'Không gian quản lý' : 'Vé luôn bên bạn' }}</strong><small>{{ session.isOrganizer() || session.isAdmin() ? 'Mở khu vực của bạn' : 'Mở vé điện tử của bạn' }}</small></span><app-icon name="right" /></a>
+</section>
+
+<section aria-labelledby="featured-title" class="featured-section">
+  <div class="section-heading">
+    <div><p class="eyebrow">ĐỪNG BỎ LỠ</p><h2 id="featured-title">Cuộc hẹn tiếp theo của bạn <span class="heading-spark">✦</span></h2><p class="muted section-description">Những sự kiện sắp diễn ra, những kỷ niệm sắp bắt đầu.</p></div>
+    <a routerLink="/events" class="browse-link">Tất cả sự kiện <app-icon name="right" /></a>
+  </div>
+  @if (loading()) {
+    <app-loading-state variant="cards" label="Đang tìm những trải nghiệm dành cho bạn…" />
+  } @else if (error()) {
+    <div class="home-feedback"><span class="feedback-symbol"><app-icon name="compass" /></span><h3>Chưa thể tải sự kiện lúc này</h3><p class="muted" role="alert">{{ error() }}</p><button mat-stroked-button type="button" (click)="load()"><app-icon name="refresh" /> Thử lại</button></div>
+  } @else if (featured().length === 0) {
+    <div class="home-feedback"><span class="feedback-symbol"><app-icon name="calendar" /></span><h3>Điều thú vị đang được chuẩn bị</h3><p class="muted">Chưa có sự kiện sắp diễn ra được công bố. Anh em mình quay lại sau nhé!</p><a mat-stroked-button routerLink="/events">Xem danh sách sự kiện</a></div>
+  } @else {
+    <div class="event-grid">
+      @for (ev of featured(); track ev.id) {
+        <a class="event-card" [routerLink]="['/events', ev.id]">
+          <div class="event-banner" [style.background-image]="bannerStyle(ev)">@if (!ev.bannerUrl) { <app-icon name="calendar" /> }<span class="card-discover">Khám phá <app-icon name="right" /></span></div>
+          <div class="event-body"><span class="event-cat">{{ ev.category.name }}</span><h3>{{ ev.title }}</h3><app-event-sales-status [event]="ev" [now]="now()" /><dl class="card-dates"><div><dt>Diễn ra</dt><dd>{{ ev.startTime | dateTime }}</dd></div><div><dt>Mở bán</dt><dd>{{ ev.salesStartTime | dateTime }}</dd></div></dl><p class="event-meta"><app-icon name="compass" /> {{ ev.venue.name }}, {{ ev.venue.city }}</p></div>
+        </a>
+      }
+    </div>
+  }
+</section>
+
+<section class="journey-section" aria-labelledby="journey-title">
+  <div class="journey-intro"><p class="eyebrow">ÍT THAO TÁC, NHIỀU NIỀM VUI</p><h2 id="journey-title">Từ “đi không?”<br />đến “đi thôi!”</h2><p class="muted">Một hành trình đặt vé đơn giản, để bạn dành thời gian cho điều mình thích.</p></div>
+  <div class="journey-step"><span>01</span><app-icon name="search" /><h3>Chọn điều bạn thích</h3><p>Tìm kiếm và lọc sự kiện theo địa điểm, thời gian, sở thích.</p></div>
+  <div class="journey-step"><span>02</span><app-icon name="ticket" /><h3>Chọn vé phù hợp</h3><p>Xem hạng vé, chọn số lượng và hoàn tất đặt vé trực tuyến.</p></div>
+  <div class="journey-step"><span>03</span><app-icon name="qr" /><h3>Sẵn sàng tận hưởng</h3><p>Mở vé điện tử trong tài khoản và mang theo đến sự kiện.</p></div>
+</section>

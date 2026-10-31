@@ -1,0 +1,12 @@
+:host { display: block; width: 100%; padding: 16px 0; color: var(--app-muted); }
+.loading-label { display: flex; align-items: center; gap: 12px; font-size: .9rem; }
+mat-spinner { flex-shrink: 0; }
+.skeleton-content { margin-top: 20px; }
+.skeleton-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.skeleton-panel { min-width: 0; padding: 22px; background: var(--app-panel); border: 1px solid var(--app-line); border-radius: 18px; }
+.skeleton-content > .skeleton-panel + .skeleton-panel { margin-top: 20px; }
+.skeleton-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin: 16px 0; }
+.skeleton-row { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 24px; padding: 20px 0 8px; border-top: 1px solid var(--app-line); }
+ngx-skeleton-loader { display: block; min-width: 0; }
+@media (max-width: 900px) { .skeleton-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .skeleton-grid, .skeleton-fields { grid-template-columns: 1fr; gap: 16px; } .skeleton-panel { padding: 18px; } .skeleton-row { gap: 12px; } }

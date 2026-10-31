@@ -1,6 +1,6 @@
     <app-page-header title="Đặt vé" subtitle="Chọn một hạng vé và số lượng cho đơn của bạn." />
     @if (loading()) {
-      <app-loading-state label="Đang tải thông tin đặt vé…" />
+      <app-loading-state variant="detail" label="Đang tải thông tin đặt vé…" />
     } @else if (loadError()) {
       <p class="form-notice error" role="alert">{{ loadError() }}</p>
       <a mat-stroked-button routerLink="/events">Khám phá sự kiện</a>

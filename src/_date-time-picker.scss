@@ -1,0 +1,26 @@
+.flatpickr-calendar {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  border: 1px solid var(--app-accent-line);
+  border-radius: 16px;
+  box-shadow: 0 14px 48px #30204e26;
+  padding: 8px;
+  width: 326px;
+  max-width: calc(100vw - 24px);
+  color: var(--app-ink);
+  z-index: 1100;
+}
+.flatpickr-calendar .flatpickr-months { margin: 4px 0 8px; }
+.flatpickr-calendar .flatpickr-current-month { font-size: 110%; }
+.flatpickr-calendar .flatpickr-day { border-radius: 10px; }
+.flatpickr-calendar .flatpickr-day.selected,
+.flatpickr-calendar .flatpickr-day.selected:hover { background: var(--app-accent); border-color: var(--app-accent); }
+.flatpickr-calendar .flatpickr-day.today { border-color: var(--app-accent); }
+.flatpickr-calendar .flatpickr-day:focus-visible,
+.flatpickr-calendar button:focus-visible,
+.flatpickr-calendar select:focus-visible,
+.flatpickr-calendar input:focus-visible { outline: 2px solid var(--app-accent); outline-offset: 1px; }
+.flatpickr-calendar .flatpickr-time { margin-top: 8px; border-radius: 10px; background: var(--app-accent-soft); }
+.picker-actions { display: flex; gap: 8px; border-top: 1px solid var(--app-line); margin-top: 8px; padding: 10px 2px 2px; }
+.picker-actions button { font: inherit; font-size: .8rem; font-weight: 600; color: var(--app-accent-strong); background: var(--app-accent-soft); border: 0; border-radius: 8px; padding: 8px 12px; cursor: pointer; min-height: 36px; }
+.picker-actions button:last-child { margin-left: auto; background: var(--app-accent); color: white; }
+input[appDateTimePicker] { cursor: pointer; padding-right: 28px !important; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%237041db' stroke-width='1.7'%3E%3Crect x='3' y='5' width='18' height='16' rx='3'/%3E%3Cpath d='M7 2v6m10-6v6M3 11h18m-11 4h3'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right center; }

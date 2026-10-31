@@ -56,6 +56,6 @@ describe('Application Shell', () => {
     const harness = await RouterTestingHarness.create();
     const component = await harness.navigateByUrl('/');
     expect(component).toBeTruthy();
-    expect(harness.routeNativeElement?.textContent).toContain('Khám phá & đặt vé');
+    expect(harness.routeNativeElement?.textContent).toContain('Gặp điều tuyệt vời.');
   });
 });

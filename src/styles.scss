@@ -1,70 +1,38 @@
 @use '@angular/material' as mat;
-@use 'sass:map';
+@use './redesign';
+@use 'flatpickr/dist/flatpickr.css';
+@use './date-time-picker';
 
-// Keep Material controls neutral; use the shared accent tokens for highlighted content.
-$tones: (
-  0: #000000,
-  4: #101010,
-  6: #151515,
-  10: #1d1d1d,
-  12: #222222,
-  17: #303030,
-  20: #383838,
-  22: #3d3d3d,
-  24: #424242,
-  25: #454545,
-  30: #515151,
-  35: #5c5c5c,
-  40: #666666,
-  50: #7b7b7b,
-  60: #929292,
-  70: #ababab,
-  80: #c5c5c5,
-  87: #dedede,
-  90: #e5e5e5,
-  92: #ebebeb,
-  94: #f0f0f0,
-  95: #f2f2f2,
-  96: #f5f5f5,
-  98: #fafafa,
-  99: #fdfdfd,
-  100: #ffffff,
-);
-$mono-palette: map.merge(
-  $tones,
-  (
-    secondary: $tones,
-    neutral: $tones,
-    neutral-variant: $tones,
-    error: $tones,
-  )
-);
+
+// Material controls share the same colorful identity as the application.
+
 
 html {
   color-scheme: light;
   @include mat.theme(
     (
       color: (
-        primary: $mono-palette,
-        tertiary: $mono-palette,
+        primary: mat.$violet-palette,
+        tertiary: mat.$orange-palette,
         theme-type: light,
       ),
-      typography: Arial,
+      typography: 'Segoe UI',
       density: 0,
     )
   );
 }
 
 :root {
-  --app-bg: #f5f5f5;
-  --app-panel: #fdfdfd;
-  --app-ink: #1d1d1d;
-  --app-muted: #515151;
-  --app-line: #d2d2d2;
-  --app-accent: #0f766e;
-  --app-accent-strong: #115e59;
-  --app-accent-soft: #edf9f6;
-  --app-accent-line: #b7e4db;
+  --app-bg: #f8f9fd;
+  --app-panel: #ffffff;
+  --app-ink: #202039;
+  --app-muted: #62657b;
+  --app-line: #e3e5ef;
+  --app-accent: #7041db;
+  --app-accent-strong: #5630b1;
+  --app-accent-soft: #f0ebff;
+  --app-accent-line: #d9ccfa;
+  --app-coral: #ff805f;
   --app-info: #1e40af;
   --app-info-soft: #eff6ff;
   --app-info-line: #bfdbfe;
@@ -77,9 +45,9 @@ html {
   --app-danger: #b91c1c;
   --app-danger-soft: #fef2f2;
   --app-danger-line: #fecaca;
-  --app-soft: #ebebeb;
+  --app-soft: #eff0f7;
   --app-inverse: #fdfdfd;
-  font-family: 'Arial', 'Helvetica Neue', sans-serif;
+  font-family: 'Segoe UI', 'Arial', sans-serif;
   color: var(--app-ink);
   background: var(--app-bg);
 }
@@ -559,12 +527,14 @@ button app-icon {
 
 /* Material controls inherit the same geometry as the rest of the interface. */
 .mat-mdc-button-base {
-  --mdc-filled-button-container-shape: 4px;
-  --mdc-outlined-button-container-shape: 4px;
-  --mdc-text-button-container-shape: 4px;
+  --mdc-filled-button-container-shape: 12px;
+  --mdc-outlined-button-container-shape: 12px;
+  --mdc-text-button-container-shape: 12px;
+  --mdc-filled-button-container-height: 46px;
+  --mdc-outlined-button-container-height: 46px;
 }
 .mat-mdc-form-field {
-  --mdc-outlined-text-field-container-shape: 4px;
+  --mdc-outlined-text-field-container-shape: 12px;
 }
 .mat-mdc-form-field-error {
   color: var(--app-danger);
@@ -656,6 +626,10 @@ button app-icon {
     padding: 20px;
   }
 }
+:root {
+  @include redesign.styles;
+}
+
 /* Shared UX: visible keyboard focus, long content and mobile navigation. */
 :where(textarea, select, [tabindex]):focus-visible {
   outline: 2px solid var(--app-accent);
@@ -728,6 +702,14 @@ main {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  ngx-skeleton-loader .skeleton-loader,
+  ngx-skeleton-loader .skeleton-loader::before,
+  ngx-skeleton-loader .skeleton-loader::after,
+  .mat-mdc-progress-bar *,
+  .flatpickr-calendar {
+    animation: none !important;
+    transition: none !important;
+  }
   app-loading-state svg,
   app-loading-state circle {
     animation: none !important;

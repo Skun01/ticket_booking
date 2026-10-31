@@ -1,1 +1,6 @@
-// App root styles
+.navigation-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 2000;
+  --mdc-linear-progress-active-indicator-color: var(--app-accent);
+}

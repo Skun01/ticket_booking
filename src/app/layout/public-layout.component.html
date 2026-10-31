@@ -1,7 +1,7 @@
     <a appSkipLink class="skip-link" href="#main-content">Đến nội dung chính</a>
     <header class="site-header">
       <a class="brand" routerLink="/" aria-label="Trang chủ">
-        <span class="brand-icon"><app-icon name="grid" /></span> Fullstack App
+        <img class="brand-logo" src="logo.svg" width="44" height="44" alt="" /> <span>vé<span class="brand-highlight">vui</span><span class="brand-dot">.</span></span>
       </a>
       <nav aria-label="Điều hướng chính">
         <a
@@ -42,12 +42,13 @@
             </button>
           </div>
         } @else {
-          <a class="header-action" routerLink="/login"> <app-icon name="login" /> Đăng nhập </a>
+          <a class="header-action" routerLink="/login"> <app-icon name="user" /> Đăng nhập </a>
+          <a class="header-register" routerLink="/register">Đăng ký <app-icon name="right" /></a>
         }
       </div>
     </header>
     <main id="main-content" class="page-container" tabindex="-1"><router-outlet /></main>
     <footer class="site-footer">
-      <span>Fullstack Starter</span>
-      <span>Spring Boot 4.1 · Angular 22</span>
+      <div><a class="brand footer-brand" routerLink="/"><img class="brand-logo" src="logo.svg" width="44" height="44" alt="" /><span>vé<span class="brand-highlight">vui</span>.</span></a><p>Kết nối bạn với những khoảnh khắc đáng nhớ.</p></div>
+      <div class="footer-links"><a routerLink="/events">Khám phá sự kiện</a><a routerLink="/login">Tài khoản của bạn</a><span>Đi để trải nghiệm. Vui để nhớ.</span></div>
     </footer>

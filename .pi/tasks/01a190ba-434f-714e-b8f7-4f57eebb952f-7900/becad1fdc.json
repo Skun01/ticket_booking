@@ -1,0 +1,30 @@
+{
+  "id": "becad1fdc",
+  "name": "Run frontend unit tests",
+  "command": "npm test -- --watch=false",
+  "status": "completed",
+  "outputPath": ".pi\\tasks\\01a190ba-434f-714e-b8f7-4f57eebb952f-7900\\becad1fdc.output",
+  "cwd": "C:\\Data\\ticket_booking",
+  "startTime": 1793429950309,
+  "endTime": 1793429964005,
+  "exitCode": 0,
+  "signal": null,
+  "pid": 11224,
+  "bytesWritten": 864,
+  "isAgent": false,
+  "surviveReload": false,
+  "notified": true,
+  "notifyOnCompletion": true,
+  "triggerOnCompletion": true,
+  "timeoutSeconds": 240,
+  "shellPolicy": {
+    "policy": "cmd",
+    "executable": "C:\\Windows\\system32\\cmd.exe",
+    "argvPrefix": [
+      "/d",
+      "/s",
+      "/c"
+    ],
+    "dialect": "cmd"
+  }
+}

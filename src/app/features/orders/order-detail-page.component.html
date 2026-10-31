@@ -65,7 +65,7 @@
 
 @if (loading()) {
   <section class="checkout-card loading-card" aria-label="Đang tải thông tin thanh toán">
-    <app-loading-state
+    <app-loading-state variant="detail"
       [label]="
         paymentReturn()
           ? paymentCancelled()

@@ -8,7 +8,7 @@
       <p class="form-notice success" role="status">{{ notice() }}</p>
     }
     @if (loading()) {
-      <app-loading-state label="Đang tải sự kiện và hạng vé…" />
+      <app-loading-state variant="detail" label="Đang tải sự kiện và hạng vé…" />
     } @else if (event(); as ev) {
       <section class="panel event-info">
         <app-status-badge [status]="ev.status" />

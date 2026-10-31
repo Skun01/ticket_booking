@@ -1,0 +1,30 @@
+{
+  "id": "beb9bbf02",
+  "name": "Build ticket logo update",
+  "command": "npm run build",
+  "status": "completed",
+  "outputPath": ".pi\\tasks\\01a190ba-434f-714e-b8f7-4f57eebb952f-7900\\beb9bbf02.output",
+  "cwd": "C:\\Data\\ticket_booking",
+  "startTime": 1793430963338,
+  "endTime": 1793430969621,
+  "exitCode": 0,
+  "signal": null,
+  "pid": 20408,
+  "bytesWritten": 3396,
+  "isAgent": false,
+  "surviveReload": false,
+  "notified": true,
+  "notifyOnCompletion": true,
+  "triggerOnCompletion": true,
+  "timeoutSeconds": 180,
+  "shellPolicy": {
+    "policy": "cmd",
+    "executable": "C:\\Windows\\system32\\cmd.exe",
+    "argvPrefix": [
+      "/d",
+      "/s",
+      "/c"
+    ],
+    "dialect": "cmd"
+  }
+}

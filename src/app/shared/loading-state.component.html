@@ -1,1 +1,28 @@
-<mat-spinner [diameter]="20" aria-hidden="true" /><span>{{ label() }}</span>
+<div class="loading-label"><mat-spinner [diameter]="20" aria-hidden="true" /><span>{{ label() }}</span></div>
+@if (variant() !== 'inline') {
+  <div class="skeleton-content" aria-hidden="true" inert>
+    @switch (variant()) {
+      @case ('cards') {
+        <div class="skeleton-grid">
+          @for (card of cards; track card) {
+            <div class="skeleton-panel"><ngx-skeleton-loader [theme]="banner" /><ngx-skeleton-loader [theme]="short" /><ngx-skeleton-loader [count]="3" [theme]="line" /></div>
+          }
+        </div>
+      }
+      @case ('table') {
+        <div class="skeleton-panel"><ngx-skeleton-loader [theme]="short" />
+          @for (row of rows; track row) { <div class="skeleton-row">@for (col of cards; track col) { <ngx-skeleton-loader [theme]="line" /> }</div> }
+        </div>
+      }
+      @case ('form') {
+        <div class="skeleton-panel"><ngx-skeleton-loader [theme]="short" /><div class="skeleton-fields">@for (row of rows; track row) { <div><ngx-skeleton-loader [theme]="short" /><ngx-skeleton-loader [theme]="field" /></div> }</div><ngx-skeleton-loader [theme]="banner" /></div>
+      }
+      @case ('report') {
+        <div class="skeleton-grid">@for (card of cards; track card) { <ngx-skeleton-loader [theme]="metric" /> }</div><div class="skeleton-panel"><ngx-skeleton-loader [theme]="short" /><ngx-skeleton-loader [theme]="chart" /></div>
+      }
+      @default {
+        <div class="skeleton-panel"><ngx-skeleton-loader [theme]="banner" /><div class="skeleton-fields"><div><ngx-skeleton-loader [theme]="short" /><ngx-skeleton-loader [count]="4" [theme]="line" /></div><ngx-skeleton-loader [theme]="metric" /></div></div>
+      }
+    }
+  </div>
+}

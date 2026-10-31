@@ -17,12 +17,10 @@ import { Icon } from '../../shared/icon.component';
   imports: [LoadingState, RouterLink, MatButtonModule, Icon, DateTimePipe, EventSalesStatus],
   templateUrl: './home-page.component.html',
   
+  styleUrl: './home-page.component.scss',
   styles: `
     .event-body {
       overflow-wrap: anywhere;
-    }
-    .intro-section h1 {
-      font-size: clamp(2rem, 4vw, 3.2rem);
     }
     @media (prefers-reduced-motion: reduce) {
       .event-card {

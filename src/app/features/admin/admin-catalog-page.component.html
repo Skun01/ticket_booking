@@ -31,7 +31,7 @@
       </p>
     }
     @if (detailLoading()) {
-      <app-loading-state label="Đang tải dữ liệu mới nhất để chỉnh sửa…" />
+      <app-loading-state variant="inline" label="Đang tải dữ liệu mới nhất để chỉnh sửa…" />
     }
     @if (editorOpen()) {
       <section class="panel editor" aria-labelledby="catalog-editor-title">
@@ -137,7 +137,7 @@
       </section>
     }
     @if (loading()) {
-      <app-loading-state label="Đang tải danh sách…" />
+      <app-loading-state variant="table" label="Đang tải danh sách…" />
     } @else if (listError()) {
       <p class="form-notice error" role="alert">{{ listError() }}</p>
       <button

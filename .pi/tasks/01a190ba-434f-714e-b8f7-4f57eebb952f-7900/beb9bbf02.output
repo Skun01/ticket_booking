@@ -1,0 +1,52 @@
+
+> frontend@0.0.0 build
+> ng build
+
+❯ Building...
+✔ Building...
+Initial chunk files | Names                                 |  Raw size | Estimated transfer size
+main-ULXLK3KJ.js    | main                                  | 470.37 kB |               116.55 kB
+styles-GANY65NC.css | styles                                |  42.20 kB |                 7.61 kB
+
+                    | Initial total                         | 512.58 kB |               124.16 kB
+
+Lazy chunk files    | Names                                 |  Raw size | Estimated transfer size
+chunk-DN5Uo9Zj.js   | -                                     | 152.81 kB |                47.12 kB
+chunk-C4gEeqhF.js   | -                                     |  62.51 kB |                10.16 kB
+chunk-ClpwjYX1.js   | -                                     |  53.82 kB |                14.58 kB
+chunk-BUQQvMTQ.js   | -                                     |  45.60 kB |                 9.55 kB
+chunk-DBkdHu3V.js   | -                                     |  42.47 kB |                 9.85 kB
+chunk-IsbrHqUT.js   | order-detail-page-component           |  34.03 kB |                 8.39 kB
+chunk-4OMAH6aN.js   | -                                     |  21.98 kB |                 5.20 kB
+chunk-Db7O8oYn.js   | home-page-component                   |  20.09 kB |                 5.56 kB
+chunk-B9LN3OAa.js   | organizer-event-detail-page-component |  19.19 kB |                 5.78 kB
+chunk-CwIZSMDC.js   | events-page-component                 |  17.82 kB |                 5.23 kB
+chunk-D4FU_-rK.js   | admin-catalog-page-component          |  15.83 kB |                 4.90 kB
+chunk-C6pnd1tr.js   | booking-page-component                |  15.24 kB |                 4.78 kB
+chunk-CuUQxcAY.js   | organizer-event-form-page-component   |  11.49 kB |                 3.94 kB
+chunk-ST2Wx_AM.js   | event-detail-page-component           |  11.06 kB |                 3.61 kB
+chunk-2PBDBlr9.js   | -                                     |   9.76 kB |                 2.85 kB
+...and 28 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [4.647 seconds] - 2026-10-31T07:16:09.488Z
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mbundle initial exceeded maximum budget. Budget 500.00 kB was not met by 12.57 kB with a total of 512.58 kB.[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mangular:styles/component:scss;bfbc9aaed31b3011;C:\Data\ticket_booking\src\app\features\events\events-page.component.ts exceeded maximum budget. Budget 4.00 kB was not met by 782 bytes with a total of 4.78 kB.[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1msrc/app/features/orders/order-detail-page.component.scss exceeded maximum budget. Budget 4.00 kB was not met by 1.19 kB with a total of 5.18 kB.[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1msrc/app/features/home/home-page.component.scss exceeded maximum budget. Budget 4.00 kB was not met by 2.45 kB with a total of 6.45 kB.[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mModule 'flatpickr/dist/l10n/vn' used by 'src/app/shared/date-time-picker.directive.ts' is not ESM[0m
+
+  CommonJS or AMD dependencies can cause optimization bailouts.
+  For more information see: [4mhttps://angular.dev/tools/cli/build#configuring-commonjs-dependencies[0m
+
+
+Output location: C:\Data\ticket_booking\dist\frontend
+

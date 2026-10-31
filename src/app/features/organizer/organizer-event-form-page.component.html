@@ -5,7 +5,7 @@
       <a mat-stroked-button routerLink="/organizer">Sự kiện của tôi</a>
     </app-page-header>
     @if (loading()) {
-      <app-loading-state label="Đang tải thông tin và danh mục…" />
+      <app-loading-state variant="form" label="Đang tải thông tin và danh mục…" />
     } @else if (loadError()) {
       <p class="form-notice error" role="alert">{{ loadError() }}</p>
       @if (!invalidRoute()) {
@@ -46,25 +46,25 @@
           </mat-select>
         </mat-form-field>
         <p class="muted wide">
-          Nhập thời gian theo giờ Việt Nam (UTC+7), kể cả khi bạn đang ở múi giờ khác.
+          Chọn ngày trên lịch và giờ theo định dạng 24 giờ. Tất cả thời gian dùng múi giờ Việt Nam (UTC+7).
         </p>
         <mat-form-field appearance="outline">
           <mat-label>Mở bán (giờ Việt Nam)</mat-label>
           <input
             matInput
-            type="datetime-local"
-            step="1"
+            type="text" appDateTimePicker
+            
             formControlName="salesStartTime"
             required
           />
         </mat-form-field>
         <mat-form-field appearance="outline">
           <mat-label>Bắt đầu (giờ Việt Nam)</mat-label>
-          <input matInput type="datetime-local" step="1" formControlName="startTime" required />
+          <input matInput type="text" appDateTimePicker  formControlName="startTime" required />
         </mat-form-field>
         <mat-form-field appearance="outline">
           <mat-label>Kết thúc (giờ Việt Nam)</mat-label>
-          <input matInput type="datetime-local" step="1" formControlName="endTime" required />
+          <input matInput type="text" appDateTimePicker  formControlName="endTime" required />
         </mat-form-field>
         <p class="muted">
           Tất cả hạng vé cùng mở bán vào thời điểm này và tự động ngừng bán khi sự kiện bắt đầu.

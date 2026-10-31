@@ -1,0 +1,88 @@
+@mixin styles {
+  .brand { font-size: 1.65rem; letter-spacing: -1px; }
+  .brand-logo { display: block; flex-shrink: 0; width: 44px; height: 44px; }
+  .brand-highlight, .brand-dot { color: var(--app-accent); }
+  .brand-icon { border-radius: 12px; background: linear-gradient(140deg, #9364ef, #6331cb); transform: rotate(-8deg); padding: 10px; font-size: 1.15rem; }
+  .site-header { min-height: 86px; background: rgba(255,255,255,.97); padding-inline: max(24px, calc((100% - 1200px) / 2)); gap: 24px; }
+  .site-header nav { gap: 28px; }
+  .site-header nav a { padding: 10px 0; font-weight: 600; }
+  .site-header nav a.active { text-decoration: none; position: relative; }
+  .site-header nav a.active::after { content: ''; position: absolute; bottom: 0; left: 25%; right: 25%; height: 3px; border-radius: 8px; background: var(--app-accent); }
+  .header-action { border-radius: 10px; border-color: transparent; color: var(--app-ink); font-weight: 600; }
+  .header-register { display: inline-flex; align-items: center; gap: 12px; padding: 10px 18px; background: var(--app-accent); color: white; text-decoration: none; border-radius: 12px; font-size: .85rem; font-weight: 700; }
+  .header-register:hover { background: var(--app-accent-strong); }
+  .page-container { max-width: 1248px; padding-bottom: 72px; }
+  .site-footer { max-width: 1200px; padding: 32px 0; font-size: .85rem; }
+  .site-footer p { margin: 14px 0 0; }
+  .footer-brand { font-size: 1.4rem; }
+  .footer-links { display: flex; flex-wrap: wrap; align-items: center; gap: 24px; }
+  .footer-links a { text-decoration: none; font-weight: 600; }
+  .footer-links > span { color: var(--app-accent-strong); }
+  .section-heading { border: 0; padding-top: 0; align-items: center; }
+  .section-heading h2 { font-size: clamp(1.4rem, 2.5vw, 1.9rem); letter-spacing: -.04em; }
+  .eyebrow { letter-spacing: .12em; }
+  .section-description { font-size: .9rem; margin: 8px 0 0; }
+  .section-heading .heading-spark { font-size: 1.5rem; color: #e78049; }
+  .browse-link { display: inline-flex; align-items: center; gap: 10px; color: var(--app-accent-strong); font-size: .9rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
+  .panel, .login-card, .purchase-panel, .schedule-block { border-radius: 18px; box-shadow: 0 8px 30px #24204605; }
+  .login-card { margin-top: 52px; padding: 36px; border-top-width: 3px; box-shadow: 0 16px 60px #4937800c; }
+  .login-card > .eyebrow { margin-bottom: 12px; }
+  .login-card form > button { width: 100%; }
+  .login-footnote a { color: var(--app-accent-strong); font-weight: 600; }
+  .admin-sidebar { background: linear-gradient(165deg, #27213f, #1b1931); }
+  .admin-sidebar .brand-icon { background: #7041db; color: white; }
+  .admin-sidebar nav a { border-radius: 10px; }
+  .admin-sidebar nav a.active { background: #7041db; color: white; }
+  .admin-sidebar nav a:hover { background: #43355f; }
+  .admin-content { max-width: 1300px; }
+  .status-icon { background: var(--app-accent-soft); color: var(--app-accent); border-radius: 22px; }
+  .form-notice { border-radius: 10px; }
+  .connection-note { background: var(--app-warning-soft); color: var(--app-warning); }
+  app-home-page, app-events-page {
+    .event-grid { gap: 24px; }
+    .event-card { border-radius: 18px; box-shadow: 0 4px 16px #24204604; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+    .event-card:hover { transform: translateY(-5px); box-shadow: 0 14px 28px #49378013; border-color: var(--app-accent-line); }
+    .event-banner { position: relative; background-color: #ebe3ff; background-image: radial-gradient(circle at 75% 25%, #ffc8b6, transparent 55%), linear-gradient(135deg, #e1d5ff, #f0ebff); }
+    .event-card:nth-child(3n + 2) .event-banner { background-color: #ffede4; }
+    .event-card:nth-child(3n) .event-banner { background-color: #e0f3ee; }
+    .event-body { padding: 22px; gap: 8px; }
+    .event-body h3 { line-height: 1.45; font-size: 1.1rem; }
+    .event-meta { padding-top: 14px; border-top: 1px solid var(--app-line); }
+    .event-cat { letter-spacing: .03em; border: none; padding: 4px 10px; }
+    .card-dates dd { font-weight: 600; }
+    .card-discover { position: absolute; bottom: 14px; right: 14px; display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; background: #ffffffed; color: var(--app-accent-strong); border-radius: 999px; font-size: .75rem; font-weight: 700; }
+    .search-shell { padding: 16px; background: white; border: 1px solid var(--app-line); border-radius: 18px; box-shadow: 0 8px 24px #49378006; }
+    .search-field { background: var(--app-bg); border-radius: 12px; }
+    .search-field input { min-width: 0; }
+    .filter-toggle, .advanced-filters { border-radius: 12px; }
+  }
+  app-event-detail-page {
+    .detail-banner { border-radius: 22px; background-color: var(--app-accent-soft); }
+    .purchase-panel { border-top: 4px solid var(--app-accent); box-shadow: 0 12px 36px #4937800d; }
+    .schedule-block { background: #f0ebff55; }
+    .detail-description { padding: 28px; border: 1px solid var(--app-line); border-radius: 18px; background: white; }
+  }
+  @media (max-width: 900px) {
+    .site-header { padding: 16px 24px; gap: 12px; }
+    .site-header nav { gap: 24px; overflow-x: auto; }
+    .site-footer { margin-inline: 24px; }
+  }
+  @media (max-width: 640px) {
+    .site-header { padding: 14px 16px; }
+    .brand { font-size: 1.4rem; }
+    .site-header .header-actions { width: auto; margin-left: auto; }
+    .header-action { padding: 6px; font-size: .8rem; }
+    .header-register { padding: 8px 12px; font-size: .8rem; }
+    .header-register app-icon { display: none; }
+    .site-header nav { gap: 20px; }
+    .section-heading { align-items: flex-start; gap: 16px; }
+    .site-footer { margin-inline: 16px; }
+    .footer-links { gap: 16px; }
+    .login-card { padding: 26px 22px; }
+    app-home-page .event-grid, app-events-page .event-grid { gap: 20px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    app-home-page .event-card, app-events-page .event-card { transition: none; }
+    app-home-page .event-card:hover, app-events-page .event-card:hover { transform: none; }
+  }
+}

@@ -1,0 +1,44 @@
+
+> frontend@0.0.0 build
+> ng build
+
+❯ Building...
+✔ Building...
+Initial chunk files | Names                                 |  Raw size | Estimated transfer size
+main-TGT2AUCD.js    | main                                  | 244.39 kB |                53.94 kB
+chunk-fAwtLvbn.js   | -                                     | 219.73 kB |                63.93 kB
+styles-X5P2MGVA.css | styles                                |  24.38 kB |                 4.69 kB
+
+                    | Initial total                         | 488.50 kB |               122.57 kB
+
+Lazy chunk files    | Names                                 |  Raw size | Estimated transfer size
+chunk-MKcEC0o9.js   | -                                     | 152.82 kB |                47.13 kB
+chunk-BAtwi2Hj.js   | -                                     |  62.54 kB |                10.20 kB
+chunk-Cy_OCdgq.js   | -                                     |  45.59 kB |                 9.56 kB
+chunk-B84wKwkx.js   | -                                     |  42.50 kB |                 9.85 kB
+chunk-C7UYq_PF.js   | order-detail-page-component           |  34.01 kB |                 8.41 kB
+chunk-Cgf8U_Se.js   | home-page-component                   |  20.07 kB |                 5.56 kB
+chunk-uj3LOM8y.js   | organizer-event-detail-page-component |  19.17 kB |                 5.76 kB
+chunk-CYh5aUS_.js   | events-page-component                 |  17.71 kB |                 5.18 kB
+chunk-C_yW4v94.js   | admin-catalog-page-component          |  15.80 kB |                 4.86 kB
+chunk-Df73MEK8.js   | booking-page-component                |  15.22 kB |                 4.75 kB
+chunk-BOtR2xWz.js   | organizer-event-form-page-component   |  11.38 kB |                 3.90 kB
+chunk-DPn_GaV4.js   | event-detail-page-component           |  11.04 kB |                 3.60 kB
+chunk-Dw08OHnc.js   | -                                     |   9.79 kB |                 2.86 kB
+chunk-D7JA2TDf.js   | organizer-checkin-page-component      |   9.78 kB |                 3.46 kB
+chunk-BfEXNqQh.js   | admin-reports-page-component          |   9.14 kB |                 3.21 kB
+...and 26 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [4.858 seconds] - 2026-10-31T06:59:50.396Z
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mangular:styles/component:scss;bfbc9aaed31b3011;C:\Data\ticket_booking\src\app\features\events\events-page.component.ts exceeded maximum budget. Budget 4.00 kB was not met by 782 bytes with a total of 4.78 kB.[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1msrc/app/features/orders/order-detail-page.component.scss exceeded maximum budget. Budget 4.00 kB was not met by 1.19 kB with a total of 5.18 kB.[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1msrc/app/features/home/home-page.component.scss exceeded maximum budget. Budget 4.00 kB was not met by 2.45 kB with a total of 6.45 kB.[0m
+
+
+Output location: C:\Data\ticket_booking\dist\frontend
+

@@ -2,10 +2,10 @@ import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { SessionService } from './core/auth/session.service';
 import { NavigationUxService } from './core/navigation-ux.service';
-import { LoadingState } from './shared/loading-state.component';
+import { MatProgressBar } from '@angular/material/progress-bar';
 
 @Component({
-  imports: [RouterOutlet, LoadingState],
+  imports: [RouterOutlet, MatProgressBar],
   selector: 'app-root',
   styleUrl: './app.component.scss',
   templateUrl: './app.component.html',

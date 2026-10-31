@@ -1,3 +1,4 @@
+import { DateTimePicker } from '../../shared/date-time-picker.directive';
 import { LoadingState } from '../../shared/loading-state.component';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -20,6 +21,7 @@ import { positiveId, uncertainWrite, vietnamDateInput, vietnamInstant } from './
   selector: 'app-organizer-event-form-page',
   imports: [
     LoadingState,
+    DateTimePicker,
     RouterLink,
     ReactiveFormsModule,
     MatButton,

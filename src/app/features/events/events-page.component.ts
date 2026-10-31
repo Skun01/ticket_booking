@@ -1,3 +1,4 @@
+import { DateTimePicker } from '../../shared/date-time-picker.directive';
 import { LoadingState } from '../../shared/loading-state.component';
 import { FeedbackService } from '../../shared/feedback.service';
 import { vietnamInstant } from '../../shared/vietnam-time';
@@ -7,7 +8,7 @@ import { debounceTime, distinctUntilChanged, EMPTY, expand, interval, reduce, Su
 import { EventSalesStatus } from './event-sales-status.component';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatButton } from '@angular/material/button';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatSelect } from '@angular/material/select';
@@ -29,10 +30,10 @@ interface ActiveChip {
   selector: 'app-events-page',
   imports: [
     LoadingState,
+    DateTimePicker,
     ReactiveFormsModule,
     RouterLink,
     MatButton,
-    MatIconButton,
     MatFormField,
     MatLabel,
     MatInput,

@@ -70,7 +70,7 @@
               <mat-label>Từ ngày</mat-label>
               <input
                 matInput
-                type="datetime-local"
+                type="text" appDateTimePicker
                 formControlName="from"
                 aria-describedby="event-filter-time-help"
               />
@@ -79,7 +79,7 @@
               <mat-label>Đến ngày</mat-label>
               <input
                 matInput
-                type="datetime-local"
+                type="text" appDateTimePicker
                 formControlName="to"
                 aria-describedby="event-filter-time-help"
               />
@@ -118,7 +118,7 @@
     </div>
 
     @if (loading()) {
-      <app-loading-state label="Đang tải sự kiện…" />
+      <app-loading-state variant="cards" label="Đang tải sự kiện…" />
     } @else if (error()) {
       <p class="form-notice error" role="alert">{{ error() }}</p>
       <button mat-stroked-button type="button" (click)="load()">Thử lại</button>

@@ -1,0 +1,30 @@
+{
+  "id": "ba8c33f4f",
+  "name": "Install date and skeleton libraries",
+  "command": "npm install flatpickr ngx-skeleton-loader",
+  "status": "completed",
+  "outputPath": ".pi\\tasks\\01a190ba-434f-714e-b8f7-4f57eebb952f-7900\\ba8c33f4f.output",
+  "cwd": "C:\\Data\\ticket_booking",
+  "startTime": 1793430260007,
+  "endTime": 1793430263363,
+  "exitCode": 0,
+  "signal": null,
+  "pid": 20208,
+  "bytesWritten": 749,
+  "isAgent": false,
+  "surviveReload": false,
+  "notified": true,
+  "notifyOnCompletion": true,
+  "triggerOnCompletion": true,
+  "timeoutSeconds": 180,
+  "shellPolicy": {
+    "policy": "cmd",
+    "executable": "C:\\Windows\\system32\\cmd.exe",
+    "argvPrefix": [
+      "/d",
+      "/s",
+      "/c"
+    ],
+    "dialect": "cmd"
+  }
+}

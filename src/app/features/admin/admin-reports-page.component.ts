@@ -1,3 +1,4 @@
+import { DateTimePicker } from '../../shared/date-time-picker.directive';
 import { LoadingState } from '../../shared/loading-state.component';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -19,6 +20,7 @@ import { recentRevenueRange, vietnamDateInput, vietnamInstant } from '../../shar
   selector: 'app-admin-reports-page',
   imports: [
     LoadingState,
+    DateTimePicker,
     ReactiveFormsModule,
     MatButton,
     MatFormField,

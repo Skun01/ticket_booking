@@ -2,7 +2,7 @@
   <div class="connection-note" role="status">Đang kiểm tra phiên đăng nhập…</div>
 }
 @if (navigation.navigating()) {
-  <div class="connection-note"><app-loading-state label="Đang mở trang…" /></div>
+  <mat-progress-bar class="navigation-progress" mode="indeterminate" aria-label="Đang mở trang…" />
 }
 @if (navigation.navigationFailed()) {
   <div class="form-notice error" role="alert">
